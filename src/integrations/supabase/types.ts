@@ -14,7 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      firms: {
+        Row: {
+          approvals_count: number
+          created_at: string
+          denials_count: number
+          description: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          website: string | null
+        }
+        Insert: {
+          approvals_count?: number
+          created_at?: string
+          denials_count?: number
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          website?: string | null
+        }
+        Update: {
+          approvals_count?: number
+          created_at?: string
+          denials_count?: number
+          description?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      payout_cases: {
+        Row: {
+          amount: number | null
+          created_at: string
+          firm_id: string
+          id: string
+          notes: string | null
+          payout_date: string | null
+          screenshot_url: string | null
+          status: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          firm_id: string
+          id?: string
+          notes?: string | null
+          payout_date?: string | null
+          screenshot_url?: string | null
+          status: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          firm_id?: string
+          id?: string
+          notes?: string | null
+          payout_date?: string | null
+          screenshot_url?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_cases_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

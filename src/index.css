@@ -2,6 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    /* Dark Base Colors */
+    --background: 210 100% 3%;
+    --foreground: 210 40% 98%;
+    
+    /* Card & Surface */
+    --card: 210 50% 8%;
+    --card-foreground: 210 40% 98%;
+    
+    /* Popover */
+    --popover: 210 50% 8%;
+    --popover-foreground: 210 40% 98%;
+    
+    /* Primary - Cyan/Teal for Approvals */
+    --primary: 180 80% 50%;
+    --primary-foreground: 210 40% 98%;
+    
+    /* Secondary - For neutral elements */
+    --secondary: 210 30% 15%;
+    --secondary-foreground: 210 40% 98%;
+    
+    /* Muted */
+    --muted: 210 30% 15%;
+    --muted-foreground: 210 20% 60%;
+    
+    /* Accent */
+    --accent: 210 30% 15%;
+    --accent-foreground: 210 40% 98%;
+    
+    /* Destructive - Red/Pink for Denials */
+    --destructive: 350 80% 55%;
+    --destructive-foreground: 210 40% 98%;
+    
+    /* Success - Green for Approvals */
+    --success: 142 76% 45%;
+    --success-foreground: 210 40% 98%;
+    
+    /* Border */
+    --border: 210 30% 18%;
+    --input: 210 30% 18%;
+    --ring: 180 80% 50%;
+    
+    --radius: 0.5rem;
+    
+    /* Custom Gradients */
+    --gradient-approval: linear-gradient(135deg, hsl(180 80% 50%), hsl(142 76% 45%));
+    --gradient-denial: linear-gradient(135deg, hsl(350 80% 55%), hsl(340 75% 50%));
+    --gradient-hero: linear-gradient(180deg, hsl(210 100% 3%), hsl(210 50% 8%));
+    
+    /* Glow Effects */
+    --glow-approval: 0 0 40px hsla(180 80% 50% / 0.3);
+    --glow-denial: 0 0 40px hsla(350 80% 55% / 0.3);
+    --glow-card: 0 10px 30px hsla(210 30% 0% / 0.5);
+    
+    /* Glass Effect */
+    --glass-bg: hsla(210 50% 8% / 0.7);
+    --glass-border: hsla(210 40% 98% / 0.1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Glassmorphism utilities */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
+  
+  .glass-strong {
+    background: hsla(210 50% 8% / 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+  }
+  
+  /* Gradient text */
+  .gradient-approval-text {
+    background: var(--gradient-approval);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .gradient-denial-text {
+    background: var(--gradient-denial);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Animated gradient backgrounds */
+  .animate-gradient-approval {
+    background: linear-gradient(270deg, hsl(180 80% 50%), hsl(142 76% 45%), hsl(180 80% 50%));
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+  }
+  
+  .animate-gradient-denial {
+    background: linear-gradient(270deg, hsl(350 80% 55%), hsl(340 75% 50%), hsl(350 80% 55%));
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+  }
+  
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  /* Glow effects */
+  .glow-approval {
+    box-shadow: var(--glow-approval);
+  }
+  
+  .glow-denial {
+    box-shadow: var(--glow-denial);
+  }
+  
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
