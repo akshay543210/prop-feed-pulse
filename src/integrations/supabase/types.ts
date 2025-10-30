@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_logs: {
+        Row: {
+          action: string
+          admin_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          target_id: string | null
+          target_table: string | null
+        }
+        Insert: {
+          action: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
       firms: {
         Row: {
           approvals_count: number
@@ -57,6 +87,7 @@ export type Database = {
           payout_date: string | null
           screenshot_url: string | null
           status: string
+          user_id: string | null
         }
         Insert: {
           amount?: number | null
@@ -67,6 +98,7 @@ export type Database = {
           payout_date?: string | null
           screenshot_url?: string | null
           status: string
+          user_id?: string | null
         }
         Update: {
           amount?: number | null
@@ -77,6 +109,7 @@ export type Database = {
           payout_date?: string | null
           screenshot_url?: string | null
           status?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -88,15 +121,76 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          banned: boolean | null
+          created_at: string | null
+          email: string | null
+          id: string
+          username: string | null
+        }
+        Insert: {
+          banned?: boolean | null
+          created_at?: string | null
+          email?: string | null
+          id: string
+          username?: string | null
+        }
+        Update: {
+          banned?: boolean | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
+      log_audit: {
+        Args: {
+          p_action: string
+          p_details?: Json
+          p_target_id: string
+          p_target_table: string
+        }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "super_admin" | "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -223,6 +317,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["super_admin", "admin", "moderator", "user"],
+    },
   },
 } as const
