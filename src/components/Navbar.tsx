@@ -1,12 +1,32 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, User, LogOut } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast.error('Failed to sign out');
+    } else {
+      toast.success('Signed out successfully');
+      navigate('/');
+    }
+  };
   
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -82,11 +102,34 @@ const Navbar = () => {
                 />
               )}
             </Link>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button asChild className="bg-gradient-to-r from-primary to-accent rounded-xl">
-                <Link to="/submit">Submit Case</Link>
-              </Button>
-            </motion.div>
+            {user ? (
+              <>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button asChild className="bg-gradient-to-r from-primary to-accent rounded-xl">
+                    <Link to="/submit">Submit Case</Link>
+                  </Button>
+                </motion.div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="glass-card">
+                    <DropdownMenuItem onClick={handleSignOut}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button asChild className="bg-gradient-to-r from-primary to-accent rounded-xl">
+                  <Link to="/auth">Login / Sign Up</Link>
+                </Button>
+              </motion.div>
+            )}
           </div>
 
           <button 
@@ -133,11 +176,32 @@ const Navbar = () => {
             >
               Denials
             </Link>
-            <Button asChild className="w-full">
-              <Link to="/submit" onClick={() => setMobileMenuOpen(false)}>
-                Submit Case
-              </Link>
-            </Button>
+            {user ? (
+              <>
+                <Button asChild className="w-full">
+                  <Link to="/submit" onClick={() => setMobileMenuOpen(false)}>
+                    Submit Case
+                  </Link>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleSignOut();
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button asChild className="w-full">
+                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                  Login / Sign Up
+                </Link>
+              </Button>
+            )}
           </motion.div>
         )}
       </div>

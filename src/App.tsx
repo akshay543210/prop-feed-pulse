@@ -9,6 +9,7 @@ import Denials from "./pages/Denials";
 import Firms from "./pages/Firms";
 import FirmDetail from "./pages/FirmDetail";
 import SubmitCase from "./pages/SubmitCase";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -34,7 +35,8 @@ const App = () => (
           <Route path="/denials" element={<Denials />} />
           <Route path="/firms" element={<Firms />} />
           <Route path="/firms/:id" element={<FirmDetail />} />
-          <Route path="/submit" element={<SubmitCase />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/submit" element={<ProtectedRoute requireAuth><SubmitCase /></ProtectedRoute>} />
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />

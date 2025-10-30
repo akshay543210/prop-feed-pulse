@@ -1,21 +1,39 @@
-import { ReactNode, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAdmin } from '@/hooks/useAdmin';
+import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  requireAuth?: boolean;
 }
 
-export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAdmin, loading } = useAdmin();
-  const navigate = useNavigate();
+export const ProtectedRoute = ({ children, requireAuth = false }: ProtectedRouteProps) => {
+  const { isAdmin, loading: adminLoading } = useAdmin();
+  const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
 
-  useEffect(() => {
-    if (!loading && !isAdmin) {
-      navigate('/admin/login', { replace: true });
+  // For routes that only require authentication (not admin)
+  if (requireAuth) {
+    if (authLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      );
     }
-  }, [isAdmin, loading, navigate]);
+
+    if (!user) {
+      return <Navigate to="/auth" state={{ from: location }} replace />;
+    }
+
+    return <>{children}</>;
+  }
+
+  // For admin routes
+  const loading = adminLoading || authLoading;
+
 
   if (loading) {
     return (
@@ -26,7 +44,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   if (!isAdmin) {
-    return null;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;
