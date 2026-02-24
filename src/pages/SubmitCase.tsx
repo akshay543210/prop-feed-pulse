@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -16,7 +22,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { PlusCircle, Upload } from "lucide-react";
+import { PlusCircle, Upload, CalendarIcon, Twitter } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const SubmitCase = () => {
   const navigate = useNavigate();
@@ -26,9 +34,10 @@ const SubmitCase = () => {
     firm_id: "",
     status: "",
     amount: "",
-    payout_date: "",
     notes: "",
+    twitter_link: "",
   });
+  const [payoutDate, setPayoutDate] = useState<Date>();
   const [screenshot, setScreenshot] = useState<File | null>(null);
 
   const { data: firms } = useQuery({
@@ -61,7 +70,6 @@ const SubmitCase = () => {
     try {
       let screenshotUrl = null;
 
-      // Upload screenshot if provided
       if (screenshot) {
         const fileExt = screenshot.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
@@ -79,17 +87,17 @@ const SubmitCase = () => {
         screenshotUrl = publicUrl;
       }
 
-      // Insert payout case
       const { error: insertError } = await supabase
         .from('payout_cases')
         .insert({
           firm_id: formData.firm_id,
           status: formData.status,
           amount: formData.amount ? parseFloat(formData.amount) : null,
-          payout_date: formData.payout_date || null,
+          payout_date: payoutDate ? format(payoutDate, 'yyyy-MM-dd') : null,
           screenshot_url: screenshotUrl,
           notes: formData.notes || null,
-        });
+          twitter_link: formData.twitter_link || null,
+        } as any);
 
       if (insertError) throw insertError;
 
@@ -98,7 +106,6 @@ const SubmitCase = () => {
         description: "Thank you for contributing to the community",
       });
 
-      // Redirect based on status
       navigate(formData.status === 'approved' ? '/approvals' : '/denials');
     } catch (error: any) {
       toast({
@@ -174,14 +181,46 @@ const SubmitCase = () => {
               />
             </div>
 
+            <div className="flex flex-col">
+              <Label>Payout Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal mt-2",
+                      !payoutDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {payoutDate ? format(payoutDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={payoutDate}
+                    onSelect={setPayoutDate}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
             <div>
-              <Label htmlFor="date">Payout Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.payout_date}
-                onChange={(e) => setFormData({ ...formData, payout_date: e.target.value })}
-              />
+              <Label htmlFor="twitter_link">Twitter/X Link (optional)</Label>
+              <div className="relative mt-2">
+                <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="twitter_link"
+                  type="url"
+                  placeholder="https://x.com/yourpost"
+                  value={formData.twitter_link}
+                  onChange={(e) => setFormData({ ...formData, twitter_link: e.target.value })}
+                  className="pl-10"
+                />
+              </div>
             </div>
 
             <div>
