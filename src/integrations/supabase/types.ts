@@ -87,6 +87,7 @@ export type Database = {
           payout_date: string | null
           screenshot_url: string | null
           status: string
+          twitter_link: string | null
           user_id: string | null
         }
         Insert: {
@@ -98,6 +99,7 @@ export type Database = {
           payout_date?: string | null
           screenshot_url?: string | null
           status: string
+          twitter_link?: string | null
           user_id?: string | null
         }
         Update: {
@@ -109,6 +111,7 @@ export type Database = {
           payout_date?: string | null
           screenshot_url?: string | null
           status?: string
+          twitter_link?: string | null
           user_id?: string | null
         }
         Relationships: [

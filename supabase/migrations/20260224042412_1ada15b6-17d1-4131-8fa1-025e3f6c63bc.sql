@@ -1,0 +1,1 @@
+ALTER TABLE public.payout_cases ADD COLUMN twitter_link text;
