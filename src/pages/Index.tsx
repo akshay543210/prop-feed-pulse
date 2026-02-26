@@ -161,8 +161,9 @@ const Index = () => {
                     whileInView={{ scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                     viewport={{ once: true }}
+                    className="w-20 h-20 mx-auto mb-4 rounded-xl border border-primary/30 bg-card/60 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-primary/10"
                   >
-                    <CheckCircle className="w-16 h-16 mx-auto mb-4 text-success animate-pulse-glow" />
+                    <CheckCircle className="w-10 h-10 text-success" />
                   </motion.div>
                   <h3 className="text-6xl font-bold mb-3 gradient-text-success">
                     <AnimatedCounter end={stats.totalApprovals} />
@@ -176,8 +177,9 @@ const Index = () => {
                     whileInView={{ scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
                     viewport={{ once: true }}
+                    className="w-20 h-20 mx-auto mb-4 rounded-xl border border-destructive/30 bg-card/60 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-destructive/10"
                   >
-                    <XCircle className="w-16 h-16 mx-auto mb-4 text-destructive animate-pulse-glow" />
+                    <XCircle className="w-10 h-10 text-destructive" />
                   </motion.div>
                   <h3 className="text-6xl font-bold mb-3 gradient-text-danger">
                     <AnimatedCounter end={stats.totalDenials} />
@@ -191,8 +193,9 @@ const Index = () => {
                     whileInView={{ scale: 1 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
                     viewport={{ once: true }}
+                    className="w-20 h-20 mx-auto mb-4 rounded-xl border border-primary/30 bg-card/60 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-primary/10"
                   >
-                    <TrendingUp className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse-glow" />
+                    <TrendingUp className="w-10 h-10 text-primary" />
                   </motion.div>
                   <h3 className="text-6xl font-bold mb-3 gradient-text-primary">
                     <AnimatedCounter end={stats.totalFirms} />
