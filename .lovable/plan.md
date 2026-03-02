@@ -1,90 +1,65 @@
 
 
-## Plan: Enhance Firms, Approvals, Denials Pages + Submit Form Improvements
+## Plan: Vercel SPA Routing Fix + White-Label Cleanup + Production Optimization
 
-### Overview
-Upgrade the Firms, Approvals, and Denials pages with proper table views (default) and optional card views, add a Twitter link field to the submit form, and replace the plain date input with a visual calendar datepicker.
+### Problem Analysis
+
+1. **SPA Routing on Vercel**: No `vercel.json` exists. Vercel serves 404 for any route other than `/` on refresh because it tries to find actual files. All routes need to rewrite to `index.html`.
+
+2. **Lovable Branding**: Found in `index.html` (OG/Twitter meta tags reference `lovable.dev`), `vite.config.ts` (lovable-tagger plugin), and `package.json` (lovable-tagger dependency). The footer is clean (PropFirm Tracker branding only).
+
+3. **Favicon**: Currently uses default `public/favicon.ico`. User hasn't provided a custom one, so will keep as-is but remove Lovable OG image references.
 
 ---
 
-### 1. Add Twitter Link to payout_cases Table (Database Migration)
+### 1. Create `vercel.json` for SPA Routing
 
-Add a `twitter_link` column (nullable text) to `payout_cases` so users can optionally share their Twitter post link when submitting a case.
+Create a `vercel.json` at project root with rewrite rules so all routes fall back to `index.html`:
 
-```text
-ALTER TABLE public.payout_cases ADD COLUMN twitter_link text;
+```json
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
 ```
 
----
-
-### 2. Update Submit Case Form (`src/pages/SubmitCase.tsx`)
-
-**Changes:**
-- Add `twitter_link` field to form state
-- Add a new optional "Twitter Link" input field with a Twitter/X icon
-- Replace the plain `<Input type="date">` with a Shadcn Calendar + Popover datepicker component (visual calendar picker)
-- Store selected date as formatted string in state
-- Include `twitter_link` in the Supabase insert call
-
-**New imports:** `Calendar`, `Popover`, `PopoverTrigger`, `PopoverContent`, `CalendarIcon`, `format` from date-fns, `cn` utility.
+This ensures `/dashboard`, `/firms`, `/approvals`, etc. all work on direct access and refresh.
 
 ---
 
-### 3. Revamp Firms Page (`src/pages/Firms.tsx`)
+### 2. Clean `index.html` Meta Tags
 
-**Changes:**
-- Add a view toggle (Table / Card) with icons at the top
-- Default view: **Table view** with columns: Logo, Name, Approvals, Denials, Approval Rate, Rating (stars), Website, Created Date, Actions (View Details link)
-- Card view: Keep existing card grid layout
-- Style the table with the dark glassmorphism theme matching the site background
-- Add Framer Motion fade animations for view transitions
-
----
-
-### 4. Revamp Approvals Page (`src/pages/Approvals.tsx`)
-
-**Changes:**
-- Add a view toggle (Table / Card)
-- Default view: **Table view** with columns: Firm Name, Amount, Payout Date, Twitter Link, Screenshot (thumbnail), Notes (truncated), Submitted Date
-- Card view: Keep existing card grid
-- Table styled with dark glass theme
-- Show Twitter link as clickable icon if present
+- Update `<meta property="og:title">` from `"prop-feed-pulse"` to `"PropFirm Payout Tracker"`
+- Update `<meta property="og:description">` from `"Lovable Generated Project"` to match the existing `<meta name="description">` content
+- Replace `og:image` URL from `lovable.dev/opengraph-image-p98pqg.png` to remove Lovable reference (set to empty or a placeholder)
+- Replace `twitter:site` from `@lovable_dev` to `@PropFirmTracker` (or remove)
+- Replace `twitter:image` similarly
+- Keep existing `<title>` and `<meta name="description">` as they're already branded
 
 ---
 
-### 5. Revamp Denials Page (`src/pages/Denials.tsx`)
+### 3. Remove lovable-tagger from Production
 
-**Changes:**
-- Same structure as Approvals page
-- Add view toggle (Table / Card)
-- Default view: **Table view** with matching columns
-- Card view: existing card grid
-- Red/pink accent for denial styling in table rows
+- In `vite.config.ts`: The `componentTagger` only runs in development mode (already gated by `mode === "development"`), so it won't appear in production builds. No change needed here -- it's a dev-only tool.
+- The `lovable-tagger` package is already in `devDependencies`, so it won't be in the production bundle.
 
 ---
 
-### Technical Details
+### 4. Production Optimizations
 
-**Files to modify:**
-1. `src/pages/SubmitCase.tsx` -- Add twitter_link field, replace date input with calendar popover
-2. `src/pages/Firms.tsx` -- Add table view (default) + card view toggle
-3. `src/pages/Approvals.tsx` -- Add table view (default) + card view toggle, show twitter link
-4. `src/pages/Denials.tsx` -- Add table view (default) + card view toggle, show twitter link
+- No unused dependencies that need removal (all are actively used by UI components)
+- Auth session persistence is already handled via `localStorage` + `autoRefreshToken` in the Supabase client
+- Environment variables use `VITE_` prefix correctly for Vite builds
 
-**Database migration:**
-- Add `twitter_link` text column to `payout_cases`
+---
 
-**Components used:**
-- Existing: `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` from `@/components/ui/table`
-- Existing: `Calendar` from `@/components/ui/calendar`, `Popover` / `PopoverTrigger` / `PopoverContent`
-- Existing: `Tabs`, `Button`, `Badge`, `Card`
-- Icons: `LayoutGrid`, `List`, `CalendarIcon`, `Twitter` from lucide-react
+### Files to Create/Modify
 
-**Design approach:**
-- Tables use the same `glass` styling with `bg-background/60 backdrop-blur` borders
-- Rows have subtle hover effects matching the dark fintech theme
-- Approval rows get subtle cyan/green left border accent
-- Denial rows get subtle red/pink left border accent
-- View toggle buttons use outline style with active state highlighted
-- Calendar popover styled with `pointer-events-auto` for proper interaction
+| File | Action |
+|------|--------|
+| `vercel.json` | **Create** -- SPA rewrite rules |
+| `index.html` | **Modify** -- Remove Lovable branding from meta tags |
+
+No UI or design changes. Only deployment config and metadata cleanup.
 
