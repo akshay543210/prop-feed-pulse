@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import ParticleBackground from '@/components/ParticleBackground';
+import Seo from '@/components/Seo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Auth() {
@@ -55,6 +56,11 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
+      <Seo
+        title="Sign In or Register | Payout Cases"
+        description="Sign in or create a free Payout Cases account to submit and track proprietary trading firm payout cases."
+        path="/auth"
+      />
       <ParticleBackground />
       
       <motion.div
@@ -66,7 +72,9 @@ export default function Auth() {
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
             <User className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold gradient-text-primary">Welcome</h1>
+          <h1 className="text-3xl font-bold gradient-text-primary text-center">
+            Welcome to Payout Cases — Sign In or Register
+          </h1>
           <p className="text-muted-foreground mt-2">Login or create an account</p>
         </div>
 

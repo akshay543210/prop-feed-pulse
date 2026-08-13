@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -180,6 +181,29 @@ const FirmDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-card">
+      <Seo
+        title={`${firm.name} Payout Approval Rate | Payout Cases`}
+        description={`${firm.name} has a ${approvalRatio.toFixed(1)}% payout approval rate across ${firm.approvals_count + firm.denials_count} reported cases. See verified approvals and denials.`}
+        path={`/firms/${firm.id}`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: firm.name,
+          url: `https://payoutcases.lovable.app/firms/${firm.id}`,
+          ...(firm.description ? { description: firm.description } : {}),
+          ...(firm.approvals_count + firm.denials_count > 0
+            ? {
+                aggregateRating: {
+                  "@type": "AggregateRating",
+                  ratingValue: (approvalRatio / 20).toFixed(1),
+                  bestRating: "5",
+                  worstRating: "0",
+                  ratingCount: firm.approvals_count + firm.denials_count,
+                },
+              }
+            : {}),
+        }}
+      />
       <Navbar />
       
       <div className="container mx-auto px-4 pt-24 pb-12">
@@ -192,6 +216,7 @@ const FirmDetail = () => {
 
         {/* Firm Header */}
         <Card className="glass p-8 mb-8">
+          <h2 className="sr-only">Firm Overview</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex-1">
               <h1 className="text-4xl font-bold mb-4">{firm.name}</h1>
@@ -255,6 +280,7 @@ const FirmDetail = () => {
 
         {/* Cases Tabs */}
         <Tabs defaultValue="approvals" className="w-full">
+          <h2 className="text-2xl font-bold mb-4">Verified Payout Cases</h2>
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="approvals">
               <CheckCircle className="w-4 h-4 mr-2" />

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -95,6 +96,19 @@ const Firms = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-card">
+      <Seo
+        title="Proprietary Trading Firms | Payout Cases"
+        description="Compare proprietary trading firms by payout approval rate, approvals and denials, updated in real time from verified community cases."
+        path="/firms"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Proprietary Trading Firms",
+          url: "https://payoutcases.lovable.app/firms",
+          description:
+            "Directory of proprietary trading firms ranked by payout approval performance.",
+        }}
+      />
       <Navbar />
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="mb-8">
@@ -120,10 +134,10 @@ const Firms = () => {
               </SelectContent>
             </Select>
             <div className="flex gap-1 border border-border rounded-lg p-1">
-              <Button variant={view === "table" ? "default" : "ghost"} size="icon" onClick={() => setView("table")} className="h-8 w-8">
+              <Button variant={view === "table" ? "default" : "ghost"} size="icon" aria-label="Switch to table view" aria-pressed={view === "table"} onClick={() => setView("table")} className="h-8 w-8">
                 <List className="h-4 w-4" />
               </Button>
-              <Button variant={view === "card" ? "default" : "ghost"} size="icon" onClick={() => setView("card")} className="h-8 w-8">
+              <Button variant={view === "card" ? "default" : "ghost"} size="icon" aria-label="Switch to card view" aria-pressed={view === "card"} onClick={() => setView("card")} className="h-8 w-8">
                 <LayoutGrid className="h-4 w-4" />
               </Button>
             </div>
