@@ -40,7 +40,7 @@ const WaveFooter = () => {
               viewport={{ once: true }}
             >
               <h3 className="text-2xl font-bold gradient-text-primary mb-4">
-                PropFirm Tracker
+                PayoutCases
               </h3>
               <p className="text-muted-foreground text-sm">
                 Premium real-time analytics for proprietary trading firm payouts.
@@ -132,7 +132,7 @@ const WaveFooter = () => {
             className="pt-8 border-t border-border/50 text-center text-sm text-muted-foreground"
           >
             <p>
-              © 2024 PropFirm Tracker. All rights reserved. Built with precision
+              © 2024 PayoutCases. All rights reserved. Built with precision
               for traders.
             </p>
           </motion.div>
