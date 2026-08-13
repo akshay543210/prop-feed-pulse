@@ -93,6 +93,7 @@ const WaveFooter = () => {
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   href="https://twitter.com"
+                  aria-label="Payout Cases on Twitter/X"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 transition-colors"
@@ -103,6 +104,7 @@ const WaveFooter = () => {
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   href="https://t.me"
+                  aria-label="Payout Cases on Telegram"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center hover:bg-accent/20 transition-colors"
@@ -113,6 +115,7 @@ const WaveFooter = () => {
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   href="https://discord.com"
+                  aria-label="Payout Cases on Discord"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-xl bg-success/10 border border-success/20 flex items-center justify-center hover:bg-success/20 transition-colors"

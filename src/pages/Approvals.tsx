@@ -55,8 +55,8 @@ const Approvals = () => {
             <p className="text-muted-foreground">Real-time feed of approved payout cases across all firms</p>
           </div>
           <div className="flex gap-1 border border-border rounded-lg p-1">
-            <Button variant={view === "table" ? "default" : "ghost"} size="icon" onClick={() => setView("table")} className="h-8 w-8"><List className="h-4 w-4" /></Button>
-            <Button variant={view === "card" ? "default" : "ghost"} size="icon" onClick={() => setView("card")} className="h-8 w-8"><LayoutGrid className="h-4 w-4" /></Button>
+            <Button variant={view === "table" ? "default" : "ghost"} size="icon" aria-label="Switch to table view" aria-pressed={view === "table"} onClick={() => setView("table")} className="h-8 w-8"><List className="h-4 w-4" /></Button>
+            <Button variant={view === "card" ? "default" : "ghost"} size="icon" aria-label="Switch to card view" aria-pressed={view === "card"} onClick={() => setView("card")} className="h-8 w-8"><LayoutGrid className="h-4 w-4" /></Button>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ const Approvals = () => {
                         <TableCell className="text-sm text-muted-foreground">{c.payout_date ? format(new Date(c.payout_date), 'MMM dd, yyyy') : "—"}</TableCell>
                         <TableCell className="text-center">
                           {(c as any).twitter_link ? (
-                            <a href={(c as any).twitter_link} target="_blank" rel="noopener noreferrer" className="inline-flex text-primary hover:text-primary/80"><Twitter className="h-4 w-4" /></a>
+                            <a href={(c as any).twitter_link} target="_blank" rel="noopener noreferrer" aria-label="View this payout case on Twitter/X" className="inline-flex text-primary hover:text-primary/80"><Twitter className="h-4 w-4" /></a>
                           ) : "—"}
                         </TableCell>
                         <TableCell>

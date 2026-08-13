@@ -120,10 +120,10 @@ const Firms = () => {
               </SelectContent>
             </Select>
             <div className="flex gap-1 border border-border rounded-lg p-1">
-              <Button variant={view === "table" ? "default" : "ghost"} size="icon" onClick={() => setView("table")} className="h-8 w-8">
+              <Button variant={view === "table" ? "default" : "ghost"} size="icon" aria-label="Switch to table view" aria-pressed={view === "table"} onClick={() => setView("table")} className="h-8 w-8">
                 <List className="h-4 w-4" />
               </Button>
-              <Button variant={view === "card" ? "default" : "ghost"} size="icon" onClick={() => setView("card")} className="h-8 w-8">
+              <Button variant={view === "card" ? "default" : "ghost"} size="icon" aria-label="Switch to card view" aria-pressed={view === "card"} onClick={() => setView("card")} className="h-8 w-8">
                 <LayoutGrid className="h-4 w-4" />
               </Button>
             </div>
