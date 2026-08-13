@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,11 @@ const Denials = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-card">
+      <Seo
+        title="Denied Prop Firm Payouts | Payout Cases"
+        description="See a real-time feed of denied payout cases across proprietary trading firms, including reported reasons and firm details."
+        path="/denials"
+      />
       <Navbar />
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="flex items-center justify-between mb-8">
