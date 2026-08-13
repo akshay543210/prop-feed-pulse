@@ -344,7 +344,7 @@ const FirmDetail = () => {
           <h2 className="text-2xl font-bold mb-1">Approval Trend</h2>
           <p className="text-sm text-muted-foreground mb-4">Monthly approval rate based on reported cases</p>
           <FirmTrendChart cases={allCases} />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
             <div className="rounded-xl border border-border p-4 text-center">
               <p className="text-2xl font-bold">{allCases.length}</p>
               <p className="text-xs text-muted-foreground">Total reported cases</p>
@@ -354,53 +354,46 @@ const FirmDetail = () => {
               <p className="text-xs text-muted-foreground">Cases in last 30 days</p>
             </div>
             <div className="rounded-xl border border-border p-4 text-center">
-              <p className="text-2xl font-bold">{avgPayoutDays !== null ? `${avgPayoutDays}d` : "—"}</p>
-              <p className="text-xs text-muted-foreground">Avg. reporting delay</p>
+              <p className="text-2xl font-bold">{formatDays(avgDays)}</p>
+              <p className="text-xs text-muted-foreground">Avg. payout time</p>
+            </div>
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold"><TrendBadge delta={trend} /></p>
+              <p className="text-xs text-muted-foreground">30d approval trend</p>
             </div>
           </div>
         </Card>
 
-        <Tabs defaultValue="approvals" className="w-full">
-          <h2 className="text-2xl font-bold mb-4">Verified Payout Cases</h2>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="approvals">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Approvals ({approvals.length})
-            </TabsTrigger>
-            <TabsTrigger value="denials">
-              <XCircle className="w-4 h-4 mr-2" />
-              Denials ({denials.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="approvals" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {approvals.map((payoutCase) => (
-                <CaseCard key={payoutCase.id} payoutCase={payoutCase} isApproval={true} />
-              ))}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Payout Cases</h2>
+          <FilterChips
+            label="Filter cases for this firm"
+            value={caseFilter}
+            onChange={setCaseFilter}
+            options={[
+              { value: "all", label: `All (${allCases.length})` },
+              { value: "approvals", label: `Approvals (${approvals.length})` },
+              { value: "denials", label: `Denials (${denials.length})` },
+              { value: "verified", label: "Verified" },
+              { value: "disputed", label: "Disputed" },
+            ]}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCases.map((payoutCase) => (
+              <CaseCard
+                key={payoutCase.id}
+                payoutCase={payoutCase}
+                isApproval={payoutCase.status === "approved"}
+              />
+            ))}
+          </div>
+          {filteredCases.length === 0 && (
+            <div className="text-center py-12">
+              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted" />
+              <p className="text-muted-foreground">No cases match this filter</p>
             </div>
-            {approvals.length === 0 && (
-              <div className="text-center py-12">
-                <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted" />
-                <p className="text-muted-foreground">No approved cases yet</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="denials" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {denials.map((payoutCase) => (
-                <CaseCard key={payoutCase.id} payoutCase={payoutCase} isApproval={false} />
-              ))}
-            </div>
-            {denials.length === 0 && (
-              <div className="text-center py-12">
-                <XCircle className="w-16 h-16 mx-auto mb-4 text-muted" />
-                <p className="text-muted-foreground">No denied cases yet</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+          )}
+        </section>
       </div>
     </div>
   );
