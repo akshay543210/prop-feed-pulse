@@ -16,6 +16,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, TrendingUp, ArrowRight, Zap, Shield, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { approvalRate, avgPayoutDays, formatDays, groupByFirm } from "@/lib/stats";
+import TrendBadge from "@/components/TrendBadge";
+import { trendDelta } from "@/lib/stats";
 
 const Index = () => {
   const { toast } = useToast();
@@ -25,10 +28,13 @@ const Index = () => {
     totalFirms: 0,
   });
   const [topFirms, setTopFirms] = useState<any[]>([]);
+  const [allCases, setAllCases] = useState<any[]>([]);
+  const [firmNames, setFirmNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchStats();
     fetchTopFirms();
+    fetchCases();
     
     const firmsChannel = supabase
       .channel('firms-changes')
@@ -85,6 +91,17 @@ const Index = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const fetchCases = async () => {
+    const [{ data: cases }, { data: firms }] = await Promise.all([
+      supabase.from('payout_cases').select('firm_id, status, created_at, payout_date, verification_status'),
+      supabase.from('firms').select('id, name'),
+    ]);
+    setAllCases(cases || []);
+    const names: Record<string, string> = {};
+    (firms || []).forEach((f) => { names[f.id] = f.name; });
+    setFirmNames(names);
   };
 
   return (
