@@ -11,6 +11,9 @@ import { CheckCircle, XCircle, Star, ExternalLink, Calendar, DollarSign, ArrowLe
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import FirmTrendChart from "@/components/FirmTrendChart";
+import FilterChips from "@/components/FilterChips";
+import TrendBadge from "@/components/TrendBadge";
+import { avgPayoutDays, formatDays, trendDelta } from "@/lib/stats";
 import FollowFirmButton from "@/components/FollowFirmButton";
 import CaseStatusBadge from "@/components/CaseStatusBadge";
 import CaseVoteButtons from "@/components/CaseVoteButtons";
@@ -24,6 +27,7 @@ const FirmDetail = () => {
   const [approvals, setApprovals] = useState<any[]>([]);
   const [denials, setDenials] = useState<any[]>([]);
   const [allCases, setAllCases] = useState<any[]>([]);
+  const [caseFilter, setCaseFilter] = useState("all");
   const submitters = useSubmitters(allCases.map((c) => c.user_id));
 
   useEffect(() => {
@@ -147,16 +151,26 @@ const FirmDetail = () => {
   const recentVolume = allCases.filter(
     (c) => Date.now() - new Date(c.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000
   ).length;
-  const payoutDeltas = allCases
-    .filter((c) => c.payout_date && c.created_at)
-    .map((c) =>
-      Math.abs(
-        (new Date(c.created_at).getTime() - new Date(c.payout_date).getTime()) / 86400000
-      )
-    );
-  const avgPayoutDays = payoutDeltas.length
-    ? Math.round(payoutDeltas.reduce((a, b) => a + b, 0) / payoutDeltas.length)
-    : null;
+  const avgDays = avgPayoutDays(allCases);
+  const trend = trendDelta(allCases);
+
+  const sortCasesList = (list: any[]) =>
+    [...list].sort((a, b) => {
+      const aD = a.verification_status === 'disputed' ? 1 : 0;
+      const bD = b.verification_status === 'disputed' ? 1 : 0;
+      if (aD !== bD) return aD - bD;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+  const filteredCases = sortCasesList(
+    allCases.filter((c) => {
+      if (caseFilter === "verified") return c.verification_status === "verified";
+      if (caseFilter === "approvals") return c.status === "approved";
+      if (caseFilter === "denials") return c.status === "denied";
+      if (caseFilter === "disputed") return c.verification_status === "disputed";
+      return true;
+    })
+  );
 
   const CaseCard = ({ payoutCase, isApproval }: any) => (
     <Card className={`glass p-6 transition-smooth hover:scale-105 ${payoutCase.verification_status === 'disputed' ? 'opacity-80 border-destructive/40' : ''} ${isApproval ? 'hover:glow-approval' : 'hover:glow-denial'}`}>

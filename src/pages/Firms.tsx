@@ -170,16 +170,6 @@ const Firms = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Search firms..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="approvals">Most Approved</SelectItem>
-                <SelectItem value="denials">Most Denied</SelectItem>
-                <SelectItem value="ratio">Best Approval Ratio</SelectItem>
-              </SelectContent>
-            </Select>
             <div className="flex gap-1 border border-border rounded-lg p-1">
               <Button
                 variant={onlyFollowing ? "default" : "ghost"}
@@ -202,6 +192,20 @@ const Firms = () => {
           </div>
         </div>
 
+        <FilterChips
+          label="Sort firms"
+          value={sortBy}
+          onChange={setSortBy}
+          options={[
+            { value: "approvals", label: "Most approved" },
+            { value: "ratio", label: "Best approval rate" },
+            { value: "cases", label: "Most cases" },
+            { value: "fastest", label: "Fastest payout" },
+            { value: "trending_down", label: "Trending down" },
+            { value: "denials", label: "Most denied" },
+          ]}
+        />
+
         <AnimatePresence mode="wait">
           {view === "table" ? (
             <motion.div key="table" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
@@ -213,6 +217,8 @@ const Firms = () => {
                       <TableHead className="text-muted-foreground text-center">Approvals</TableHead>
                       <TableHead className="text-muted-foreground text-center">Denials</TableHead>
                       <TableHead className="text-muted-foreground text-center">Approval Rate</TableHead>
+                      <TableHead className="text-muted-foreground text-center">Avg Payout Time</TableHead>
+                      <TableHead className="text-muted-foreground text-center">Trend</TableHead>
                       <TableHead className="text-muted-foreground text-center">Rating</TableHead>
                       <TableHead className="text-muted-foreground">Website</TableHead>
                       <TableHead className="text-muted-foreground">Created</TableHead>
@@ -223,6 +229,7 @@ const Firms = () => {
                     {filteredFirms.map((firm) => {
                       const total = firm.approvals_count + firm.denials_count;
                       const rate = total > 0 ? ((firm.approvals_count / total) * 100).toFixed(1) : "0.0";
+                      const s = statsFor(firm.id);
                       return (
                         <TableRow key={firm.id} className="border-border hover:bg-secondary/30 transition-colors">
                           <TableCell className="font-semibold flex items-center gap-3">
@@ -239,6 +246,8 @@ const Firms = () => {
                               <span className="text-xs text-muted-foreground">{rate}%</span>
                             </div>
                           </TableCell>
+                          <TableCell className="text-center text-sm text-muted-foreground font-mono">{formatDays(s.avg)}</TableCell>
+                          <TableCell className="text-center"><TrendBadge delta={s.trend} /></TableCell>
                           <TableCell className="text-center"><RatingStars rating={getRating(firm)} /></TableCell>
                           <TableCell>
                             {firm.website && (
