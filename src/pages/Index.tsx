@@ -349,6 +349,56 @@ const Index = () => {
                 );
               })}
             </div>
+
+            {/* Top firms this month */}
+            <div className="mt-16 max-w-4xl mx-auto glass-card rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <h3 className="text-lg font-bold">Top firms this month</h3>
+                <Link to="/firms" className="text-sm text-primary hover:underline">View all firms</Link>
+              </div>
+              <div className="divide-y divide-border">
+                {(() => {
+                  const monthCases = allCases.filter(
+                    (c) => new Date(c.created_at).getTime() > Date.now() - 30 * 86400000
+                  );
+                  const rows = Object.entries(groupByFirm(monthCases))
+                    .map(([firmId, list]) => ({
+                      firmId,
+                      name: firmNames[firmId] || "Unknown firm",
+                      cases: list.length,
+                      rate: approvalRate(list),
+                      avg: avgPayoutDays(list),
+                      trend: trendDelta(allCases.filter((c) => c.firm_id === firmId)),
+                    }))
+                    .sort((a, b) => b.rate - a.rate || b.cases - a.cases)
+                    .slice(0, 5);
+
+                  if (!rows.length) {
+                    return (
+                      <p className="px-6 py-8 text-center text-muted-foreground text-sm">
+                        No cases reported in the last 30 days
+                      </p>
+                    );
+                  }
+
+                  return rows.map((r) => (
+                    <Link
+                      key={r.firmId}
+                      to={`/firms/${r.firmId}`}
+                      className="grid grid-cols-4 items-center gap-2 px-6 py-4 hover:bg-secondary/30 transition-colors text-sm"
+                    >
+                      <span className="font-semibold truncate">{r.name}</span>
+                      <span className="text-center text-muted-foreground">{r.cases} cases</span>
+                      <span className="text-center font-mono text-success">{r.rate.toFixed(1)}%</span>
+                      <span className="text-right flex items-center justify-end gap-3">
+                        <span className="text-muted-foreground font-mono">{formatDays(r.avg)}</span>
+                        <TrendBadge delta={r.trend} />
+                      </span>
+                    </Link>
+                  ));
+                })()}
+              </div>
+            </div>
           </div>
         </section>
 
