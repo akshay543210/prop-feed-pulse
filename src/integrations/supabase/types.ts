@@ -44,6 +44,67 @@ export type Database = {
         }
         Relationships: []
       }
+      case_votes: {
+        Row: {
+          case_id: string
+          created_at: string
+          id: string
+          user_id: string
+          vote_type: Database["public"]["Enums"]["vote_type"]
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+          vote_type: Database["public"]["Enums"]["vote_type"]
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          vote_type?: Database["public"]["Enums"]["vote_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_votes_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "payout_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      firm_follows: {
+        Row: {
+          created_at: string
+          firm_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          firm_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          firm_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "firm_follows_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       firms: {
         Row: {
           approvals_count: number
@@ -82,37 +143,49 @@ export type Database = {
           amount: number | null
           created_at: string
           firm_id: string
+          flags_count: number
           id: string
           notes: string | null
           payout_date: string | null
+          proof_type: Database["public"]["Enums"]["case_proof_type"]
           screenshot_url: string | null
           status: string
           twitter_link: string | null
+          upvotes_count: number
           user_id: string | null
+          verification_status: Database["public"]["Enums"]["case_verification_status"]
         }
         Insert: {
           amount?: number | null
           created_at?: string
           firm_id: string
+          flags_count?: number
           id?: string
           notes?: string | null
           payout_date?: string | null
+          proof_type?: Database["public"]["Enums"]["case_proof_type"]
           screenshot_url?: string | null
           status: string
           twitter_link?: string | null
+          upvotes_count?: number
           user_id?: string | null
+          verification_status?: Database["public"]["Enums"]["case_verification_status"]
         }
         Update: {
           amount?: number | null
           created_at?: string
           firm_id?: string
+          flags_count?: number
           id?: string
           notes?: string | null
           payout_date?: string | null
+          proof_type?: Database["public"]["Enums"]["case_proof_type"]
           screenshot_url?: string | null
           status?: string
           twitter_link?: string | null
+          upvotes_count?: number
           user_id?: string | null
+          verification_status?: Database["public"]["Enums"]["case_verification_status"]
         }
         Relationships: [
           {
@@ -174,6 +247,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      compute_case_verification: {
+        Args: {
+          _flags: number
+          _proof_type: Database["public"]["Enums"]["case_proof_type"]
+          _upvotes: number
+        }
+        Returns: Database["public"]["Enums"]["case_verification_status"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -194,6 +275,13 @@ export type Database = {
     }
     Enums: {
       app_role: "super_admin" | "admin" | "moderator" | "user"
+      case_proof_type: "screenshot" | "screenshot_and_social"
+      case_verification_status:
+        | "pending"
+        | "verified"
+        | "community_confirmed"
+        | "disputed"
+      vote_type: "upvote" | "flag"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -322,6 +410,14 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["super_admin", "admin", "moderator", "user"],
+      case_proof_type: ["screenshot", "screenshot_and_social"],
+      case_verification_status: [
+        "pending",
+        "verified",
+        "community_confirmed",
+        "disputed",
+      ],
+      vote_type: ["upvote", "flag"],
     },
   },
 } as const

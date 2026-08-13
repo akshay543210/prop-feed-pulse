@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { PlusCircle, Upload, CalendarIcon, Twitter } from "lucide-react";
 import { format } from "date-fns";
@@ -30,6 +31,7 @@ import { cn } from "@/lib/utils";
 const SubmitCase = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firm_id: "",
@@ -66,6 +68,16 @@ const SubmitCase = () => {
       return;
     }
 
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Sign in to submit a payout case.",
+        variant: "destructive",
+      });
+      navigate("/auth", { state: { from: { pathname: "/submit" } } });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -91,6 +103,7 @@ const SubmitCase = () => {
       const { error: insertError } = await supabase
         .from('payout_cases')
         .insert({
+          user_id: user.id,
           firm_id: formData.firm_id,
           status: formData.status,
           amount: formData.amount ? parseFloat(formData.amount) : null,
@@ -215,7 +228,7 @@ const SubmitCase = () => {
             </div>
 
             <div>
-              <Label htmlFor="twitter_link">Twitter/X Link (optional)</Label>
+              <Label htmlFor="twitter_link">Social post link (X/Twitter) (optional)</Label>
               <div className="relative mt-2">
                 <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -227,6 +240,9 @@ const SubmitCase = () => {
                   className="pl-10"
                 />
               </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Adding a public post link upgrades your case from Pending to Verified.
+              </p>
             </div>
 
             <div>

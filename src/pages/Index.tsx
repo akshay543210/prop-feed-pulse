@@ -11,6 +11,7 @@ import TiltCard from "@/components/TiltCard";
 import LiveFeed from "@/components/LiveFeed";
 import WaveFooter from "@/components/WaveFooter";
 import PageTransition from "@/components/PageTransition";
+import SubmitCaseButton from "@/components/SubmitCaseButton";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, TrendingUp, ArrowRight, Zap, Shield, BarChart3 } from "lucide-react";
@@ -154,9 +155,9 @@ const Index = () => {
                   </Button>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button size="lg" variant="outline" asChild className="px-8 py-6 text-lg rounded-xl border-2 glass">
-                    <Link to="/submit">Submit Your Case</Link>
-                  </Button>
+                  <SubmitCaseButton size="lg" variant="outline" className="px-8 py-6 text-lg rounded-xl border-2 glass">
+                    Submit Your Case
+                  </SubmitCaseButton>
                 </motion.div>
               </div>
             </motion.div>

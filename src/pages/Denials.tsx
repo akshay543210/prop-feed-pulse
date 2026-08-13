@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Seo from "@/components/Seo";
@@ -6,17 +6,25 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { XCircle, Calendar, DollarSign, LayoutGrid, List, Twitter } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import CaseStatusBadge from "@/components/CaseStatusBadge";
+import CaseVoteButtons from "@/components/CaseVoteButtons";
+import SubmitterBadge from "@/components/SubmitterBadge";
+import { useSubmitters } from "@/hooks/useSubmitters";
 
 const Denials = () => {
   const { toast } = useToast();
   const [cases, setCases] = useState<any[]>([]);
   const [view, setView] = useState<"table" | "card">("table");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     fetchDenials();
@@ -44,6 +52,22 @@ const Denials = () => {
     }
   };
 
+  const submitters = useSubmitters(cases.map((c) => c.user_id));
+
+  const visibleCases = useMemo(() => {
+    const filtered = cases.filter((c) => {
+      if (statusFilter === "all") return true;
+      return c.verification_status === statusFilter;
+    });
+    // Disputed cases sink to the bottom of the default order.
+    return [...filtered].sort((a, b) => {
+      const aDisputed = a.verification_status === "disputed" ? 1 : 0;
+      const bDisputed = b.verification_status === "disputed" ? 1 : 0;
+      if (aDisputed !== bDisputed) return aDisputed - bDisputed;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+  }, [cases, statusFilter]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-card">
       <Seo
@@ -53,29 +77,44 @@ const Denials = () => {
       />
       <Navbar />
       <div className="container mx-auto px-4 pt-24 pb-12">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
           <div>
             <h1 className="text-4xl font-bold mb-4 gradient-denial-text flex items-center">
               <XCircle className="w-10 h-10 mr-3" /> Denied Payouts
             </h1>
             <p className="text-muted-foreground">Real-time feed of denied payout cases across all firms</p>
           </div>
-          <div className="flex gap-1 border border-border rounded-lg p-1">
-            <Button variant={view === "table" ? "default" : "ghost"} size="icon" aria-label="Switch to table view" aria-pressed={view === "table"} onClick={() => setView("table")} className="h-8 w-8"><List className="h-4 w-4" /></Button>
-            <Button variant={view === "card" ? "default" : "ghost"} size="icon" aria-label="Switch to card view" aria-pressed={view === "card"} onClick={() => setView("card")} className="h-8 w-8"><LayoutGrid className="h-4 w-4" /></Button>
+          <div className="flex items-center gap-3">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[200px]" aria-label="Filter by verification status">
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                <SelectItem value="verified">Verified only</SelectItem>
+                <SelectItem value="community_confirmed">Community Confirmed only</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex gap-1 border border-border rounded-lg p-1">
+              <Button variant={view === "table" ? "default" : "ghost"} size="icon" aria-label="Switch to table view" aria-pressed={view === "table"} onClick={() => setView("table")} className="h-8 w-8"><List className="h-4 w-4" /></Button>
+              <Button variant={view === "card" ? "default" : "ghost"} size="icon" aria-label="Switch to card view" aria-pressed={view === "card"} onClick={() => setView("card")} className="h-8 w-8"><LayoutGrid className="h-4 w-4" /></Button>
+            </div>
           </div>
         </div>
 
         <AnimatePresence mode="wait">
           {view === "table" ? (
             <motion.div key="table" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-              <div className="glass rounded-lg overflow-hidden">
+              <div className="glass rounded-lg overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-border hover:bg-transparent">
                       <TableHead className="text-muted-foreground">Firm</TableHead>
                       <TableHead className="text-muted-foreground text-right">Amount</TableHead>
                       <TableHead className="text-muted-foreground">Payout Date</TableHead>
+                      <TableHead className="text-muted-foreground">Status</TableHead>
+                      <TableHead className="text-muted-foreground">Votes</TableHead>
+                      <TableHead className="text-muted-foreground">Submitter</TableHead>
                       <TableHead className="text-muted-foreground text-center">Twitter</TableHead>
                       <TableHead className="text-muted-foreground">Screenshot</TableHead>
                       <TableHead className="text-muted-foreground">Notes</TableHead>
@@ -83,14 +122,22 @@ const Denials = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {cases.map((c) => (
-                      <TableRow key={c.id} className="border-border hover:bg-secondary/30 transition-colors border-l-2 border-l-destructive/50">
+                    {visibleCases.map((c) => (
+                      <TableRow key={c.id} className={`border-border hover:bg-secondary/30 transition-colors border-l-2 ${c.verification_status === 'disputed' ? 'border-l-destructive opacity-80' : 'border-l-destructive/50'}`}>
                         <TableCell className="font-semibold">{c.firms?.name}</TableCell>
                         <TableCell className="text-right font-medium">{c.amount ? `$${parseFloat(c.amount).toLocaleString()}` : "—"}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{c.payout_date ? format(new Date(c.payout_date), 'MMM dd, yyyy') : "—"}</TableCell>
+                        <TableCell><CaseStatusBadge status={c.verification_status} /></TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">{(c.upvotes_count || 0) - (c.flags_count || 0)}</span>
+                            <CaseVoteButtons caseId={c.id} ownerId={c.user_id} upvotes={c.upvotes_count || 0} flags={c.flags_count || 0} onVoted={fetchDenials} compact />
+                          </div>
+                        </TableCell>
+                        <TableCell><SubmitterBadge submitter={c.user_id ? submitters[c.user_id] : undefined} /></TableCell>
                         <TableCell className="text-center">
-                          {(c as any).twitter_link ? (
-                            <a href={(c as any).twitter_link} target="_blank" rel="noopener noreferrer" aria-label="View this payout case on Twitter/X" className="inline-flex text-primary hover:text-primary/80"><Twitter className="h-4 w-4" /></a>
+                          {c.twitter_link ? (
+                            <a href={c.twitter_link} target="_blank" rel="noopener noreferrer" aria-label="View this payout case on Twitter/X" className="inline-flex text-primary hover:text-primary/80"><Twitter className="h-4 w-4" /></a>
                           ) : "—"}
                         </TableCell>
                         <TableCell>
@@ -107,12 +154,15 @@ const Denials = () => {
           ) : (
             <motion.div key="card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {cases.map((payoutCase) => (
-                  <Card key={payoutCase.id} className="glass p-6 transition-smooth hover:scale-105 hover:glow-denial">
+                {visibleCases.map((payoutCase) => (
+                  <Card key={payoutCase.id} className={`glass p-6 transition-smooth hover:scale-105 hover:glow-denial ${payoutCase.verification_status === 'disputed' ? 'border-destructive/50' : ''}`}>
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h3 className="text-xl font-bold mb-1">{payoutCase.firms?.name}</h3>
-                        <Badge className="bg-destructive/20 text-destructive">Denied</Badge>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge className="bg-destructive/20 text-destructive">Denied</Badge>
+                          <CaseStatusBadge status={payoutCase.verification_status} />
+                        </div>
                       </div>
                       <XCircle className="w-6 h-6 text-destructive" />
                     </div>
@@ -128,15 +178,16 @@ const Denials = () => {
                         <span className="text-sm text-muted-foreground">{format(new Date(payoutCase.payout_date), 'MMM dd, yyyy')}</span>
                       </div>
                     )}
-                    {(payoutCase as any).twitter_link && (
-                      <a href={(payoutCase as any).twitter_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary text-sm mb-4 hover:underline">
+                    {payoutCase.twitter_link && (
+                      <a href={payoutCase.twitter_link} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary text-sm mb-4 hover:underline">
                         <Twitter className="w-4 h-4" /> View on Twitter/X
                       </a>
                     )}
                     {payoutCase.screenshot_url && <img src={payoutCase.screenshot_url} alt="Payout proof" className="w-full h-40 object-cover rounded-lg mb-4" />}
                     {payoutCase.notes && <p className="text-sm text-muted-foreground line-clamp-3">{payoutCase.notes}</p>}
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <span className="text-xs text-muted-foreground">Submitted {format(new Date(payoutCase.created_at), 'MMM dd, yyyy')}</span>
+                    <div className="mt-4 pt-4 border-t border-border flex items-center justify-between gap-2">
+                      <SubmitterBadge submitter={payoutCase.user_id ? submitters[payoutCase.user_id] : undefined} />
+                      <CaseVoteButtons caseId={payoutCase.id} ownerId={payoutCase.user_id} upvotes={payoutCase.upvotes_count || 0} flags={payoutCase.flags_count || 0} onVoted={fetchDenials} compact />
                     </div>
                   </Card>
                 ))}
@@ -145,7 +196,7 @@ const Denials = () => {
           )}
         </AnimatePresence>
 
-        {cases.length === 0 && (
+        {visibleCases.length === 0 && (
           <div className="text-center py-12">
             <XCircle className="w-16 h-16 mx-auto mb-4 text-muted" />
             <p className="text-muted-foreground">No denied payouts yet</p>

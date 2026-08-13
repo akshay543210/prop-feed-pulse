@@ -21,18 +21,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Star, LayoutGrid, List, ExternalLink } from "lucide-react";
+import { Search, Star, LayoutGrid, List, ExternalLink, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Firms = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [firms, setFirms] = useState<any[]>([]);
   const [filteredFirms, setFilteredFirms] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("approvals");
   const [view, setView] = useState<"table" | "card">("table");
+  const [onlyFollowing, setOnlyFollowing] = useState(false);
+  const [followedIds, setFollowedIds] = useState<string[]>([]);
 
   useEffect(() => {
     fetchFirms();
@@ -47,7 +51,16 @@ const Firms = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy]);
+  useEffect(() => {
+    const loadFollows = async () => {
+      if (!user) { setFollowedIds([]); setOnlyFollowing(false); return; }
+      const { data } = await supabase.from('firm_follows').select('firm_id').eq('user_id', user.id);
+      setFollowedIds((data || []).map((f) => f.firm_id));
+    };
+    loadFollows();
+  }, [user]);
+
+  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy, onlyFollowing, followedIds]);
 
   const fetchFirms = async () => {
     try {
@@ -61,6 +74,7 @@ const Firms = () => {
 
   const filterAndSortFirms = () => {
     let filtered = firms.filter(firm => firm.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (onlyFollowing) filtered = filtered.filter(firm => followedIds.includes(firm.id));
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "approvals": return b.approvals_count - a.approvals_count;
@@ -134,6 +148,17 @@ const Firms = () => {
               </SelectContent>
             </Select>
             <div className="flex gap-1 border border-border rounded-lg p-1">
+              <Button
+                variant={onlyFollowing ? "default" : "ghost"}
+                size="icon"
+                aria-label="Show only firms you follow"
+                aria-pressed={onlyFollowing}
+                onClick={() => setOnlyFollowing((v) => !v)}
+                className="h-8 w-8"
+                disabled={!user}
+              >
+                <Heart className={`h-4 w-4 ${onlyFollowing ? "fill-current" : ""}`} />
+              </Button>
               <Button variant={view === "table" ? "default" : "ghost"} size="icon" aria-label="Switch to table view" aria-pressed={view === "table"} onClick={() => setView("table")} className="h-8 w-8">
                 <List className="h-4 w-4" />
               </Button>

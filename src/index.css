@@ -35,7 +35,12 @@
     
     /* Success - Premium Green */
     --success: 160 84% 45%;
+    --success-foreground: 220 25% 8%;
     --success-glow: 160 84% 55%;
+
+    /* Warning - Amber */
+    --warning: 38 95% 55%;
+    --warning-foreground: 220 25% 8%;
     
     /* Destructive - Premium Red */
     --destructive: 350 89% 60%;
