@@ -5,9 +5,7 @@ import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import FilterChips from "@/components/FilterChips";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -56,9 +54,16 @@ const Approvals = () => {
 
   const visibleCases = useMemo(() => {
     const filtered = cases.filter((c) => {
-      if (statusFilter === "all") return true;
+      if (statusFilter === "all" || statusFilter === "top") return true;
       return c.verification_status === statusFilter;
     });
+    if (statusFilter === "top") {
+      return [...filtered].sort(
+        (a, b) =>
+          ((b.upvotes_count || 0) - (b.flags_count || 0)) -
+          ((a.upvotes_count || 0) - (a.flags_count || 0))
+      );
+    }
     // Disputed cases sink to the bottom of the default order.
     return [...filtered].sort((a, b) => {
       const aDisputed = a.verification_status === "disputed" ? 1 : 0;
@@ -85,22 +90,24 @@ const Approvals = () => {
             <p className="text-muted-foreground">Real-time feed of approved payout cases across all firms</p>
           </div>
           <div className="flex items-center gap-3">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[200px]" aria-label="Filter by verification status">
-                <SelectValue placeholder="All statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="verified">Verified only</SelectItem>
-                <SelectItem value="community_confirmed">Community Confirmed only</SelectItem>
-              </SelectContent>
-            </Select>
             <div className="flex gap-1 border border-border rounded-lg p-1">
               <Button variant={view === "table" ? "default" : "ghost"} size="icon" aria-label="Switch to table view" aria-pressed={view === "table"} onClick={() => setView("table")} className="h-8 w-8"><List className="h-4 w-4" /></Button>
               <Button variant={view === "card" ? "default" : "ghost"} size="icon" aria-label="Switch to card view" aria-pressed={view === "card"} onClick={() => setView("card")} className="h-8 w-8"><LayoutGrid className="h-4 w-4" /></Button>
             </div>
           </div>
         </div>
+
+        <FilterChips
+          label="Filter approved cases"
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "verified", label: "Verified only" },
+            { value: "community_confirmed", label: "Community confirmed" },
+            { value: "top", label: "Most upvoted" },
+          ]}
+        />
 
         <AnimatePresence mode="wait">
           {view === "table" ? (
