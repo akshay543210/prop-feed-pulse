@@ -7,13 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -22,6 +15,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search, Star, LayoutGrid, List, ExternalLink, Heart } from "lucide-react";
+import FilterChips from "@/components/FilterChips";
+import TrendBadge from "@/components/TrendBadge";
+import { avgPayoutDays, formatDays, groupByFirm, trendDelta } from "@/lib/stats";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
@@ -37,9 +33,11 @@ const Firms = () => {
   const [view, setView] = useState<"table" | "card">("table");
   const [onlyFollowing, setOnlyFollowing] = useState(false);
   const [followedIds, setFollowedIds] = useState<string[]>([]);
+  const [firmCases, setFirmCases] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
     fetchFirms();
+    fetchCases();
     
     const channel = supabase
       .channel('firms-live-feed')
@@ -60,7 +58,19 @@ const Firms = () => {
     loadFollows();
   }, [user]);
 
-  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy, onlyFollowing, followedIds]);
+  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy, onlyFollowing, followedIds, firmCases]);
+
+  const fetchCases = async () => {
+    const { data } = await supabase
+      .from('payout_cases')
+      .select('firm_id, status, created_at, payout_date');
+    setFirmCases(groupByFirm(data || []));
+  };
+
+  const statsFor = (firmId: string) => {
+    const list = firmCases[firmId] || [];
+    return { avg: avgPayoutDays(list), trend: trendDelta(list), volume: list.length };
+  };
 
   const fetchFirms = async () => {
     try {
@@ -79,6 +89,22 @@ const Firms = () => {
       switch (sortBy) {
         case "approvals": return b.approvals_count - a.approvals_count;
         case "denials": return b.denials_count - a.denials_count;
+        case "cases":
+          return (b.approvals_count + b.denials_count) - (a.approvals_count + a.denials_count);
+        case "fastest": {
+          const aAvg = statsFor(a.id).avg;
+          const bAvg = statsFor(b.id).avg;
+          if (aAvg === null) return 1;
+          if (bAvg === null) return -1;
+          return aAvg - bAvg;
+        }
+        case "trending_down": {
+          const aT = statsFor(a.id).trend;
+          const bT = statsFor(b.id).trend;
+          if (aT === null) return 1;
+          if (bT === null) return -1;
+          return aT - bT;
+        }
         case "ratio":
           const ratioA = a.approvals_count / (a.approvals_count + a.denials_count) || 0;
           const ratioB = b.approvals_count / (b.approvals_count + b.denials_count) || 0;
@@ -137,16 +163,6 @@ const Firms = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input placeholder="Search firms..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
             </div>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="approvals">Most Approved</SelectItem>
-                <SelectItem value="denials">Most Denied</SelectItem>
-                <SelectItem value="ratio">Best Approval Ratio</SelectItem>
-              </SelectContent>
-            </Select>
             <div className="flex gap-1 border border-border rounded-lg p-1">
               <Button
                 variant={onlyFollowing ? "default" : "ghost"}
@@ -169,6 +185,20 @@ const Firms = () => {
           </div>
         </div>
 
+        <FilterChips
+          label="Sort firms"
+          value={sortBy}
+          onChange={setSortBy}
+          options={[
+            { value: "approvals", label: "Most approved" },
+            { value: "ratio", label: "Best approval rate" },
+            { value: "cases", label: "Most cases" },
+            { value: "fastest", label: "Fastest payout" },
+            { value: "trending_down", label: "Trending down" },
+            { value: "denials", label: "Most denied" },
+          ]}
+        />
+
         <AnimatePresence mode="wait">
           {view === "table" ? (
             <motion.div key="table" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
@@ -180,6 +210,8 @@ const Firms = () => {
                       <TableHead className="text-muted-foreground text-center">Approvals</TableHead>
                       <TableHead className="text-muted-foreground text-center">Denials</TableHead>
                       <TableHead className="text-muted-foreground text-center">Approval Rate</TableHead>
+                      <TableHead className="text-muted-foreground text-center">Avg Payout Time</TableHead>
+                      <TableHead className="text-muted-foreground text-center">Trend</TableHead>
                       <TableHead className="text-muted-foreground text-center">Rating</TableHead>
                       <TableHead className="text-muted-foreground">Website</TableHead>
                       <TableHead className="text-muted-foreground">Created</TableHead>
@@ -190,6 +222,7 @@ const Firms = () => {
                     {filteredFirms.map((firm) => {
                       const total = firm.approvals_count + firm.denials_count;
                       const rate = total > 0 ? ((firm.approvals_count / total) * 100).toFixed(1) : "0.0";
+                      const s = statsFor(firm.id);
                       return (
                         <TableRow key={firm.id} className="border-border hover:bg-secondary/30 transition-colors">
                           <TableCell className="font-semibold flex items-center gap-3">
@@ -206,6 +239,8 @@ const Firms = () => {
                               <span className="text-xs text-muted-foreground">{rate}%</span>
                             </div>
                           </TableCell>
+                          <TableCell className="text-center text-sm text-muted-foreground font-mono">{formatDays(s.avg)}</TableCell>
+                          <TableCell className="text-center"><TrendBadge delta={s.trend} /></TableCell>
                           <TableCell className="text-center"><RatingStars rating={getRating(firm)} /></TableCell>
                           <TableCell>
                             {firm.website && (

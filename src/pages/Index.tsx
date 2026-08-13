@@ -16,6 +16,9 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, TrendingUp, ArrowRight, Zap, Shield, BarChart3 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { approvalRate, avgPayoutDays, formatDays, groupByFirm } from "@/lib/stats";
+import TrendBadge from "@/components/TrendBadge";
+import { trendDelta } from "@/lib/stats";
 
 const Index = () => {
   const { toast } = useToast();
@@ -25,10 +28,13 @@ const Index = () => {
     totalFirms: 0,
   });
   const [topFirms, setTopFirms] = useState<any[]>([]);
+  const [allCases, setAllCases] = useState<any[]>([]);
+  const [firmNames, setFirmNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     fetchStats();
     fetchTopFirms();
+    fetchCases();
     
     const firmsChannel = supabase
       .channel('firms-changes')
@@ -85,6 +91,17 @@ const Index = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const fetchCases = async () => {
+    const [{ data: cases }, { data: firms }] = await Promise.all([
+      supabase.from('payout_cases').select('firm_id, status, created_at, payout_date, verification_status'),
+      supabase.from('firms').select('id, name'),
+    ]);
+    setAllCases(cases || []);
+    const names: Record<string, string> = {};
+    (firms || []).forEach((f) => { names[f.id] = f.name; });
+    setFirmNames(names);
   };
 
   return (
@@ -226,6 +243,31 @@ const Index = () => {
                   <p className="text-muted-foreground text-lg">Tracked Firms</p>
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-14 max-w-4xl mx-auto">
+                {[
+                  { label: "Cases tracked", value: allCases.length.toLocaleString() },
+                  {
+                    label: "Verified or confirmed",
+                    value: `${allCases.length
+                      ? Math.round(
+                          (allCases.filter((c) =>
+                            ["verified", "community_confirmed"].includes(c.verification_status)
+                          ).length /
+                            allCases.length) *
+                            100
+                        )
+                      : 0}%`,
+                  },
+                  { label: "Avg payout time", value: formatDays(avgPayoutDays(allCases)) },
+                  { label: "Overall approval rate", value: `${approvalRate(allCases).toFixed(1)}%` },
+                ].map((m) => (
+                  <div key={m.label} className="glass-card rounded-xl p-5 text-center">
+                    <p className="text-2xl font-bold gradient-text-primary">{m.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{m.label}</p>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
@@ -306,6 +348,56 @@ const Index = () => {
                   </motion.div>
                 );
               })}
+            </div>
+
+            {/* Top firms this month */}
+            <div className="mt-16 max-w-4xl mx-auto glass-card rounded-2xl overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+                <h3 className="text-lg font-bold">Top firms this month</h3>
+                <Link to="/firms" className="text-sm text-primary hover:underline">View all firms</Link>
+              </div>
+              <div className="divide-y divide-border">
+                {(() => {
+                  const monthCases = allCases.filter(
+                    (c) => new Date(c.created_at).getTime() > Date.now() - 30 * 86400000
+                  );
+                  const rows = Object.entries(groupByFirm(monthCases))
+                    .map(([firmId, list]) => ({
+                      firmId,
+                      name: firmNames[firmId] || "Unknown firm",
+                      cases: list.length,
+                      rate: approvalRate(list),
+                      avg: avgPayoutDays(list),
+                      trend: trendDelta(allCases.filter((c) => c.firm_id === firmId)),
+                    }))
+                    .sort((a, b) => b.rate - a.rate || b.cases - a.cases)
+                    .slice(0, 5);
+
+                  if (!rows.length) {
+                    return (
+                      <p className="px-6 py-8 text-center text-muted-foreground text-sm">
+                        No cases reported in the last 30 days
+                      </p>
+                    );
+                  }
+
+                  return rows.map((r) => (
+                    <Link
+                      key={r.firmId}
+                      to={`/firms/${r.firmId}`}
+                      className="grid grid-cols-4 items-center gap-2 px-6 py-4 hover:bg-secondary/30 transition-colors text-sm"
+                    >
+                      <span className="font-semibold truncate">{r.name}</span>
+                      <span className="text-center text-muted-foreground">{r.cases} cases</span>
+                      <span className="text-center font-mono text-success">{r.rate.toFixed(1)}%</span>
+                      <span className="text-right flex items-center justify-end gap-3">
+                        <span className="text-muted-foreground font-mono">{formatDays(r.avg)}</span>
+                        <TrendBadge delta={r.trend} />
+                      </span>
+                    </Link>
+                  ));
+                })()}
+              </div>
             </div>
           </div>
         </section>

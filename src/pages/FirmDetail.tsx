@@ -6,11 +6,13 @@ import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, XCircle, Star, ExternalLink, Calendar, DollarSign, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import FirmTrendChart from "@/components/FirmTrendChart";
+import FilterChips from "@/components/FilterChips";
+import TrendBadge from "@/components/TrendBadge";
+import { avgPayoutDays, formatDays, trendDelta } from "@/lib/stats";
 import FollowFirmButton from "@/components/FollowFirmButton";
 import CaseStatusBadge from "@/components/CaseStatusBadge";
 import CaseVoteButtons from "@/components/CaseVoteButtons";
@@ -24,6 +26,7 @@ const FirmDetail = () => {
   const [approvals, setApprovals] = useState<any[]>([]);
   const [denials, setDenials] = useState<any[]>([]);
   const [allCases, setAllCases] = useState<any[]>([]);
+  const [caseFilter, setCaseFilter] = useState("all");
   const submitters = useSubmitters(allCases.map((c) => c.user_id));
 
   useEffect(() => {
@@ -147,16 +150,26 @@ const FirmDetail = () => {
   const recentVolume = allCases.filter(
     (c) => Date.now() - new Date(c.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000
   ).length;
-  const payoutDeltas = allCases
-    .filter((c) => c.payout_date && c.created_at)
-    .map((c) =>
-      Math.abs(
-        (new Date(c.created_at).getTime() - new Date(c.payout_date).getTime()) / 86400000
-      )
-    );
-  const avgPayoutDays = payoutDeltas.length
-    ? Math.round(payoutDeltas.reduce((a, b) => a + b, 0) / payoutDeltas.length)
-    : null;
+  const avgDays = avgPayoutDays(allCases);
+  const trend = trendDelta(allCases);
+
+  const sortCasesList = (list: any[]) =>
+    [...list].sort((a, b) => {
+      const aD = a.verification_status === 'disputed' ? 1 : 0;
+      const bD = b.verification_status === 'disputed' ? 1 : 0;
+      if (aD !== bD) return aD - bD;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+  const filteredCases = sortCasesList(
+    allCases.filter((c) => {
+      if (caseFilter === "verified") return c.verification_status === "verified";
+      if (caseFilter === "approvals") return c.status === "approved";
+      if (caseFilter === "denials") return c.status === "denied";
+      if (caseFilter === "disputed") return c.verification_status === "disputed";
+      return true;
+    })
+  );
 
   const CaseCard = ({ payoutCase, isApproval }: any) => (
     <Card className={`glass p-6 transition-smooth hover:scale-105 ${payoutCase.verification_status === 'disputed' ? 'opacity-80 border-destructive/40' : ''} ${isApproval ? 'hover:glow-approval' : 'hover:glow-denial'}`}>
@@ -330,7 +343,7 @@ const FirmDetail = () => {
           <h2 className="text-2xl font-bold mb-1">Approval Trend</h2>
           <p className="text-sm text-muted-foreground mb-4">Monthly approval rate based on reported cases</p>
           <FirmTrendChart cases={allCases} />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
             <div className="rounded-xl border border-border p-4 text-center">
               <p className="text-2xl font-bold">{allCases.length}</p>
               <p className="text-xs text-muted-foreground">Total reported cases</p>
@@ -340,53 +353,46 @@ const FirmDetail = () => {
               <p className="text-xs text-muted-foreground">Cases in last 30 days</p>
             </div>
             <div className="rounded-xl border border-border p-4 text-center">
-              <p className="text-2xl font-bold">{avgPayoutDays !== null ? `${avgPayoutDays}d` : "—"}</p>
-              <p className="text-xs text-muted-foreground">Avg. reporting delay</p>
+              <p className="text-2xl font-bold">{formatDays(avgDays)}</p>
+              <p className="text-xs text-muted-foreground">Avg. payout time</p>
+            </div>
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold"><TrendBadge delta={trend} /></p>
+              <p className="text-xs text-muted-foreground">30d approval trend</p>
             </div>
           </div>
         </Card>
 
-        <Tabs defaultValue="approvals" className="w-full">
-          <h2 className="text-2xl font-bold mb-4">Verified Payout Cases</h2>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="approvals">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Approvals ({approvals.length})
-            </TabsTrigger>
-            <TabsTrigger value="denials">
-              <XCircle className="w-4 h-4 mr-2" />
-              Denials ({denials.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="approvals" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {approvals.map((payoutCase) => (
-                <CaseCard key={payoutCase.id} payoutCase={payoutCase} isApproval={true} />
-              ))}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Payout Cases</h2>
+          <FilterChips
+            label="Filter cases for this firm"
+            value={caseFilter}
+            onChange={setCaseFilter}
+            options={[
+              { value: "all", label: `All (${allCases.length})` },
+              { value: "approvals", label: `Approvals (${approvals.length})` },
+              { value: "denials", label: `Denials (${denials.length})` },
+              { value: "verified", label: "Verified" },
+              { value: "disputed", label: "Disputed" },
+            ]}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCases.map((payoutCase) => (
+              <CaseCard
+                key={payoutCase.id}
+                payoutCase={payoutCase}
+                isApproval={payoutCase.status === "approved"}
+              />
+            ))}
+          </div>
+          {filteredCases.length === 0 && (
+            <div className="text-center py-12">
+              <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted" />
+              <p className="text-muted-foreground">No cases match this filter</p>
             </div>
-            {approvals.length === 0 && (
-              <div className="text-center py-12">
-                <CheckCircle className="w-16 h-16 mx-auto mb-4 text-muted" />
-                <p className="text-muted-foreground">No approved cases yet</p>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="denials" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {denials.map((payoutCase) => (
-                <CaseCard key={payoutCase.id} payoutCase={payoutCase} isApproval={false} />
-              ))}
-            </div>
-            {denials.length === 0 && (
-              <div className="text-center py-12">
-                <XCircle className="w-16 h-16 mx-auto mb-4 text-muted" />
-                <p className="text-muted-foreground">No denied cases yet</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+          )}
+        </section>
       </div>
     </div>
   );
