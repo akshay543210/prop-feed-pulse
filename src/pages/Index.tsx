@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import Seo from "@/components/Seo";
 import ParticleBackground from "@/components/ParticleBackground";
 import GlobeScene from "@/components/GlobeScene";
 import AnimatedCounter from "@/components/AnimatedCounter";
@@ -87,6 +88,25 @@ const Index = () => {
 
   return (
     <PageTransition>
+      <Seo
+        title="Payout Cases — Prop Firm Payout Tracker"
+        description="Real-time tracking of payout approvals and denials across top proprietary trading firms. Compare approval rates and verified payout cases."
+        path="/"
+        jsonLd={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Payout Cases",
+            url: "https://payoutcases.lovable.app",
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Payout Cases",
+            url: "https://payoutcases.lovable.app",
+          },
+        ]}
+      />
       <div className="min-h-screen relative overflow-hidden">
         <ParticleBackground />
         <Navbar />
@@ -113,7 +133,7 @@ const Index = () => {
               
               <h1 className="text-6xl md:text-8xl font-bold mb-8 leading-tight">
                 <span className="gradient-text-primary block animate-gradient">
-                  Payout Cases
+                  Payout Cases — Real-time Prop Firm Payout Tracking &amp; Statistics
                 </span>
               </h1>
               
@@ -153,6 +173,9 @@ const Index = () => {
               viewport={{ once: true }}
               className="glass-strong p-12 rounded-3xl glow-card"
             >
+              <h2 className="text-3xl font-bold mb-10 text-center gradient-text-primary">
+                Platform Statistics
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div className="text-center">
                   <motion.div
