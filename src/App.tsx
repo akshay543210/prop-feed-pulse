@@ -10,6 +10,8 @@ import Firms from "./pages/Firms";
 import FirmDetail from "./pages/FirmDetail";
 import SubmitCase from "./pages/SubmitCase";
 import Auth from "./pages/Auth";
+import UserProfile from "./pages/UserProfile";
+import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -36,6 +38,9 @@ const App = () => (
           <Route path="/firms" element={<Firms />} />
           <Route path="/firms/:id" element={<FirmDetail />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/users/:username" element={<UserProfile />} />
+          <Route path="/me" element={<UserProfile self />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/submit" element={<ProtectedRoute requireAuth><SubmitCase /></ProtectedRoute>} />
           
           {/* Admin Routes */}

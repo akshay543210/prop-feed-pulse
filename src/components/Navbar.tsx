@@ -1,10 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut } from "lucide-react";
+import { Menu, User, LogOut, Bell, UserCircle } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import SubmitCaseButton from "@/components/SubmitCaseButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,13 +103,16 @@ const Navbar = () => {
                 />
               )}
             </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <SubmitCaseButton className="bg-gradient-to-r from-primary to-accent rounded-xl">
+                Submit Case
+              </SubmitCaseButton>
+            </motion.div>
             {user ? (
               <>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button asChild className="bg-gradient-to-r from-primary to-accent rounded-xl">
-                    <Link to="/submit">Submit Case</Link>
-                  </Button>
-                </motion.div>
+                <Button asChild variant="ghost" size="icon" className="rounded-full" aria-label="Notifications">
+                  <Link to="/notifications"><Bell className="h-5 w-5" /></Link>
+                </Button>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full" aria-label="Open account menu">
@@ -116,6 +120,14 @@ const Navbar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="glass-card">
+                    <DropdownMenuItem onClick={() => navigate('/notifications')}>
+                      <Bell className="mr-2 h-4 w-4" />
+                      Notifications
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/me')}>
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      My Profile
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
@@ -178,11 +190,12 @@ const Navbar = () => {
             >
               Denials
             </Link>
+            <SubmitCaseButton className="w-full">Submit Case</SubmitCaseButton>
             {user ? (
               <>
-                <Button asChild className="w-full">
-                  <Link to="/submit" onClick={() => setMobileMenuOpen(false)}>
-                    Submit Case
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/notifications" onClick={() => setMobileMenuOpen(false)}>
+                    Notifications
                   </Link>
                 </Button>
                 <Button 

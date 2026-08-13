@@ -10,6 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CheckCircle, XCircle, Star, ExternalLink, Calendar, DollarSign, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import FirmTrendChart from "@/components/FirmTrendChart";
+import FollowFirmButton from "@/components/FollowFirmButton";
+import CaseStatusBadge from "@/components/CaseStatusBadge";
+import CaseVoteButtons from "@/components/CaseVoteButtons";
+import SubmitterBadge from "@/components/SubmitterBadge";
+import { useSubmitters } from "@/hooks/useSubmitters";
 
 const FirmDetail = () => {
   const { id } = useParams();
@@ -17,6 +23,8 @@ const FirmDetail = () => {
   const [firm, setFirm] = useState<any>(null);
   const [approvals, setApprovals] = useState<any[]>([]);
   const [denials, setDenials] = useState<any[]>([]);
+  const [allCases, setAllCases] = useState<any[]>([]);
+  const submitters = useSubmitters(allCases.map((c) => c.user_id));
 
   useEffect(() => {
     if (id) {
@@ -87,9 +95,18 @@ const FirmDetail = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      setApprovals(data?.filter(c => c.status === 'approved') || []);
-      setDenials(data?.filter(c => c.status === 'denied') || []);
+
+      const sortCases = (list: any[]) =>
+        [...list].sort((a, b) => {
+          const aD = a.verification_status === 'disputed' ? 1 : 0;
+          const bD = b.verification_status === 'disputed' ? 1 : 0;
+          if (aD !== bD) return aD - bD;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+
+      setAllCases(data || []);
+      setApprovals(sortCases(data?.filter(c => c.status === 'approved') || []));
+      setDenials(sortCases(data?.filter(c => c.status === 'denied') || []));
     } catch (error: any) {
       toast({
         title: "Error fetching cases",
@@ -127,12 +144,29 @@ const FirmDetail = () => {
   const approvalRatio = totalCases > 0 ? (firm.approvals_count / totalCases) * 100 : 0;
   const rating = getRating();
 
+  const recentVolume = allCases.filter(
+    (c) => Date.now() - new Date(c.created_at).getTime() <= 30 * 24 * 60 * 60 * 1000
+  ).length;
+  const payoutDeltas = allCases
+    .filter((c) => c.payout_date && c.created_at)
+    .map((c) =>
+      Math.abs(
+        (new Date(c.created_at).getTime() - new Date(c.payout_date).getTime()) / 86400000
+      )
+    );
+  const avgPayoutDays = payoutDeltas.length
+    ? Math.round(payoutDeltas.reduce((a, b) => a + b, 0) / payoutDeltas.length)
+    : null;
+
   const CaseCard = ({ payoutCase, isApproval }: any) => (
-    <Card className={`glass p-6 transition-smooth hover:scale-105 ${isApproval ? 'hover:glow-approval' : 'hover:glow-denial'}`}>
+    <Card className={`glass p-6 transition-smooth hover:scale-105 ${payoutCase.verification_status === 'disputed' ? 'opacity-80 border-destructive/40' : ''} ${isApproval ? 'hover:glow-approval' : 'hover:glow-denial'}`}>
       <div className="flex items-start justify-between mb-4">
-        <Badge className={isApproval ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'}>
-          {isApproval ? 'Approved' : 'Denied'}
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge className={isApproval ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'}>
+            {isApproval ? 'Approved' : 'Denied'}
+          </Badge>
+          <CaseStatusBadge status={payoutCase.verification_status} />
+        </div>
         {isApproval ? 
           <CheckCircle className="w-6 h-6 text-success" /> : 
           <XCircle className="w-6 h-6 text-destructive" />
@@ -172,9 +206,19 @@ const FirmDetail = () => {
       )}
 
       <div className="mt-4 pt-4 border-t border-border">
-        <span className="text-xs text-muted-foreground">
-          Submitted {format(new Date(payoutCase.created_at), 'MMM dd, yyyy')}
-        </span>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <span className="text-xs text-muted-foreground">
+            Submitted {format(new Date(payoutCase.created_at), 'MMM dd, yyyy')}
+          </span>
+          <SubmitterBadge submitter={payoutCase.user_id ? submitters[payoutCase.user_id] : undefined} />
+        </div>
+        <CaseVoteButtons
+          caseId={payoutCase.id}
+          ownerId={payoutCase.user_id}
+          upvotes={payoutCase.upvotes_count || 0}
+          flags={payoutCase.flags_count || 0}
+          onVoted={fetchCases}
+        />
       </div>
     </Card>
   );
@@ -239,14 +283,17 @@ const FirmDetail = () => {
                 <p className="text-muted-foreground mb-4">{firm.description}</p>
               )}
 
-              {firm.website && (
-                <Button variant="outline" asChild>
-                  <a href={firm.website} target="_blank" rel="noopener noreferrer">
-                    Visit Website
-                    <ExternalLink className="w-4 h-4 ml-2" />
-                  </a>
-                </Button>
-              )}
+              <div className="flex flex-wrap gap-3">
+                {firm.website && (
+                  <Button variant="outline" asChild>
+                    <a href={firm.website} target="_blank" rel="noopener noreferrer">
+                      Visit Website
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </a>
+                  </Button>
+                )}
+                <FollowFirmButton firmId={firm.id} />
+              </div>
             </div>
 
             <div className="flex flex-col items-center gap-4">
@@ -279,6 +326,26 @@ const FirmDetail = () => {
         </Card>
 
         {/* Cases Tabs */}
+        <Card className="glass p-6 mb-8">
+          <h2 className="text-2xl font-bold mb-1">Approval Trend</h2>
+          <p className="text-sm text-muted-foreground mb-4">Monthly approval rate based on reported cases</p>
+          <FirmTrendChart cases={allCases} />
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold">{allCases.length}</p>
+              <p className="text-xs text-muted-foreground">Total reported cases</p>
+            </div>
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold">{recentVolume}</p>
+              <p className="text-xs text-muted-foreground">Cases in last 30 days</p>
+            </div>
+            <div className="rounded-xl border border-border p-4 text-center">
+              <p className="text-2xl font-bold">{avgPayoutDays !== null ? `${avgPayoutDays}d` : "—"}</p>
+              <p className="text-xs text-muted-foreground">Avg. reporting delay</p>
+            </div>
+          </div>
+        </Card>
+
         <Tabs defaultValue="approvals" className="w-full">
           <h2 className="text-2xl font-bold mb-4">Verified Payout Cases</h2>
           <TabsList className="grid w-full grid-cols-2">

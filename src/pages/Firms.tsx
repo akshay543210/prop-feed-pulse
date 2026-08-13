@@ -33,6 +33,8 @@ const Firms = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("approvals");
   const [view, setView] = useState<"table" | "card">("table");
+  const [onlyFollowing, setOnlyFollowing] = useState(false);
+  const [followedIds, setFollowedIds] = useState<string[]>([]);
 
   useEffect(() => {
     fetchFirms();
@@ -47,7 +49,7 @@ const Firms = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy]);
+  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy, onlyFollowing, followedIds]);
 
   const fetchFirms = async () => {
     try {
@@ -61,6 +63,7 @@ const Firms = () => {
 
   const filterAndSortFirms = () => {
     let filtered = firms.filter(firm => firm.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (onlyFollowing) filtered = filtered.filter(firm => followedIds.includes(firm.id));
     filtered.sort((a, b) => {
       switch (sortBy) {
         case "approvals": return b.approvals_count - a.approvals_count;
