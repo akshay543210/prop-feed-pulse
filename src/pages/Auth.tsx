@@ -56,6 +56,11 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
+      <Seo
+        title="Sign In or Register | Payout Cases"
+        description="Sign in or create a free Payout Cases account to submit and track proprietary trading firm payout cases."
+        path="/auth"
+      />
       <ParticleBackground />
       
       <motion.div
