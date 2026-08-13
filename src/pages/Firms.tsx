@@ -22,6 +22,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search, Star, LayoutGrid, List, ExternalLink, Heart } from "lucide-react";
+import FilterChips from "@/components/FilterChips";
+import TrendBadge from "@/components/TrendBadge";
+import { avgPayoutDays, formatDays, groupByFirm, trendDelta } from "@/lib/stats";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
@@ -37,9 +40,11 @@ const Firms = () => {
   const [view, setView] = useState<"table" | "card">("table");
   const [onlyFollowing, setOnlyFollowing] = useState(false);
   const [followedIds, setFollowedIds] = useState<string[]>([]);
+  const [firmCases, setFirmCases] = useState<Record<string, any[]>>({});
 
   useEffect(() => {
     fetchFirms();
+    fetchCases();
     
     const channel = supabase
       .channel('firms-live-feed')
@@ -60,7 +65,19 @@ const Firms = () => {
     loadFollows();
   }, [user]);
 
-  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy, onlyFollowing, followedIds]);
+  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy, onlyFollowing, followedIds, firmCases]);
+
+  const fetchCases = async () => {
+    const { data } = await supabase
+      .from('payout_cases')
+      .select('firm_id, status, created_at, payout_date');
+    setFirmCases(groupByFirm(data || []));
+  };
+
+  const statsFor = (firmId: string) => {
+    const list = firmCases[firmId] || [];
+    return { avg: avgPayoutDays(list), trend: trendDelta(list), volume: list.length };
+  };
 
   const fetchFirms = async () => {
     try {
@@ -79,6 +96,22 @@ const Firms = () => {
       switch (sortBy) {
         case "approvals": return b.approvals_count - a.approvals_count;
         case "denials": return b.denials_count - a.denials_count;
+        case "cases":
+          return (b.approvals_count + b.denials_count) - (a.approvals_count + a.denials_count);
+        case "fastest": {
+          const aAvg = statsFor(a.id).avg;
+          const bAvg = statsFor(b.id).avg;
+          if (aAvg === null) return 1;
+          if (bAvg === null) return -1;
+          return aAvg - bAvg;
+        }
+        case "trending_down": {
+          const aT = statsFor(a.id).trend;
+          const bT = statsFor(b.id).trend;
+          if (aT === null) return 1;
+          if (bT === null) return -1;
+          return aT - bT;
+        }
         case "ratio":
           const ratioA = a.approvals_count / (a.approvals_count + a.denials_count) || 0;
           const ratioB = b.approvals_count / (b.approvals_count + b.denials_count) || 0;
