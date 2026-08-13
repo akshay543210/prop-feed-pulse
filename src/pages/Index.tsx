@@ -133,7 +133,7 @@ const Index = () => {
               
               <h1 className="text-6xl md:text-8xl font-bold mb-8 leading-tight">
                 <span className="gradient-text-primary block animate-gradient">
-                  Payout Cases — Real-time Prop Firm Payout Tracking &amp; Statistics
+                  Real-time Prop Firm Payout Tracking &amp; Statistics
                 </span>
               </h1>
               
