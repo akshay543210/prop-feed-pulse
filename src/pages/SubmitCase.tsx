@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -120,6 +121,11 @@ const SubmitCase = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-card">
+      <Seo
+        title="Submit a Payout Case | Payout Cases"
+        description="Report your prop firm payout approval or denial with proof, and help traders see which firms actually pay out."
+        path="/submit"
+      />
       <Navbar />
       
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
