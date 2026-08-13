@@ -103,6 +103,20 @@ const Navbar = () => {
                 />
               )}
             </Link>
+            <Link
+              to="/leaderboard"
+              className={`relative transition-colors text-sm font-medium ${
+                isActive('/leaderboard') ? 'text-primary' : 'text-foreground hover:text-primary'
+              }`}
+            >
+              Leaderboard
+              {isActive('/leaderboard') && (
+                <motion.div
+                  layoutId="navbar-indicator"
+                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                />
+              )}
+            </Link>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <SubmitCaseButton className="bg-gradient-to-r from-primary to-accent rounded-xl">
                 Submit Case
@@ -189,6 +203,13 @@ const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               Denials
+            </Link>
+            <Link
+              to="/leaderboard"
+              className="block py-2 text-sm font-medium"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Leaderboard
             </Link>
             <SubmitCaseButton className="w-full">Submit Case</SubmitCaseButton>
             {user ? (
