@@ -243,6 +243,31 @@ const Index = () => {
                   <p className="text-muted-foreground text-lg">Tracked Firms</p>
                 </div>
               </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-14 max-w-4xl mx-auto">
+                {[
+                  { label: "Cases tracked", value: allCases.length.toLocaleString() },
+                  {
+                    label: "Verified or confirmed",
+                    value: `${allCases.length
+                      ? Math.round(
+                          (allCases.filter((c) =>
+                            ["verified", "community_confirmed"].includes(c.verification_status)
+                          ).length /
+                            allCases.length) *
+                            100
+                        )
+                      : 0}%`,
+                  },
+                  { label: "Avg payout time", value: formatDays(avgPayoutDays(allCases)) },
+                  { label: "Overall approval rate", value: `${approvalRate(allCases).toFixed(1)}%` },
+                ].map((m) => (
+                  <div key={m.label} className="glass-card rounded-xl p-5 text-center">
+                    <p className="text-2xl font-bold gradient-text-primary">{m.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{m.label}</p>
+                  </div>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
