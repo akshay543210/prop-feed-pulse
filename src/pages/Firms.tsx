@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -95,6 +96,19 @@ const Firms = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-card">
+      <Seo
+        title="Proprietary Trading Firms | Payout Cases"
+        description="Compare proprietary trading firms by payout approval rate, approvals and denials, updated in real time from verified community cases."
+        path="/firms"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Proprietary Trading Firms",
+          url: "https://payoutcases.lovable.app/firms",
+          description:
+            "Directory of proprietary trading firms ranked by payout approval performance.",
+        }}
+      />
       <Navbar />
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="mb-8">
