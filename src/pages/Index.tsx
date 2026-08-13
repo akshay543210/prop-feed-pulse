@@ -113,9 +113,8 @@ const Index = () => {
               
               <h1 className="text-6xl md:text-8xl font-bold mb-8 leading-tight">
                 <span className="gradient-text-primary block animate-gradient">
-                  PropFirm Payout
+                  PayoutCases
                 </span>
-                <span className="text-foreground block">Tracker</span>
               </h1>
               
               <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
@@ -327,7 +326,7 @@ const Index = () => {
               className="text-center mb-16"
             >
               <h2 className="text-5xl font-bold mb-4">
-                Why Choose <span className="gradient-text-primary">PropFirm Tracker</span>?
+                Why Choose <span className="gradient-text-primary">PayoutCases</span>?
               </h2>
               <p className="text-xl text-muted-foreground">
                 Premium features designed for professional traders
