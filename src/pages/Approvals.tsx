@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,11 @@ const Approvals = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-card">
+      <Seo
+        title="Approved Prop Firm Payouts | Payout Cases"
+        description="Browse a real-time feed of verified approved payouts from proprietary trading firms, with amounts, dates and firm details."
+        path="/approvals"
+      />
       <Navbar />
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="flex items-center justify-between mb-8">
