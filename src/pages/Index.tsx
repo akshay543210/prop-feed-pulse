@@ -41,29 +41,42 @@ const Index = () => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'firms' }, () => {
         fetchStats();
         fetchTopFirms();
+        fetchCases();
+      })
+      .subscribe();
+
+    const casesChannel = supabase
+      .channel('homepage-case-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payout_cases' }, () => {
+        fetchStats();
+        fetchTopFirms();
+        fetchCases();
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(firmsChannel);
+      supabase.removeChannel(casesChannel);
     };
   }, []);
 
   const fetchStats = async () => {
     try {
-      const { data: firms, error } = await supabase
-        .from('firms')
-        .select('approvals_count, denials_count');
+      const [{ data: cases, error: casesError }, { count: firmsCount, error: firmsError }] = await Promise.all([
+        supabase.from('payout_cases').select('status'),
+        supabase.from('firms').select('id', { count: 'exact', head: true }),
+      ]);
 
-      if (error) throw error;
+      if (casesError) throw casesError;
+      if (firmsError) throw firmsError;
 
-      const totalApprovals = firms?.reduce((sum, f) => sum + f.approvals_count, 0) || 0;
-      const totalDenials = firms?.reduce((sum, f) => sum + f.denials_count, 0) || 0;
+      const totalApprovals = cases?.filter((item) => item.status === 'approved').length || 0;
+      const totalDenials = cases?.filter((item) => item.status === 'denied').length || 0;
 
       setStats({
         totalApprovals,
         totalDenials,
-        totalFirms: firms?.length || 0,
+        totalFirms: firmsCount || 0,
       });
     } catch (error: any) {
       toast({

@@ -47,6 +47,20 @@ const Leaderboard = () => {
       setLoading(false);
     };
     load();
+
+    const casesChannel = supabase
+      .channel("leaderboard-case-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "payout_cases" }, load)
+      .subscribe();
+    const profilesChannel = supabase
+      .channel("leaderboard-profile-changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "profiles" }, load)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(casesChannel);
+      supabase.removeChannel(profilesChannel);
+    };
   }, []);
 
   const sorted = useMemo(() => {
