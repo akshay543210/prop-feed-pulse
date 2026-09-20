@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import {
   Table,
@@ -190,9 +191,12 @@ export default function AdminFirms() {
                 return (
                   <TableRow key={firm.id}>
                     <TableCell>
-                      {firm.logo_url && (
-                        <img src={firm.logo_url} alt={firm.name} className="w-10 h-10 rounded" />
-                      )}
+                      <Avatar className="h-10 w-10 border border-border bg-secondary">
+                        {firm.logo_url && <AvatarImage src={firm.logo_url} alt={`${firm.name} logo`} className="object-contain" />}
+                        <AvatarFallback className="text-xs font-bold text-primary">
+                          {firm.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
                     </TableCell>
                     <TableCell className="font-medium">{firm.name}</TableCell>
                     <TableCell className="text-success">{firm.approvals_count}</TableCell>

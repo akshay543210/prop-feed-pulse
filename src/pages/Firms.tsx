@@ -6,6 +6,7 @@ import Seo from "@/components/Seo";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -226,7 +227,12 @@ const Firms = () => {
                       return (
                         <TableRow key={firm.id} className="border-border hover:bg-secondary/30 transition-colors">
                           <TableCell className="font-semibold flex items-center gap-3">
-                            {firm.logo_url && <img src={firm.logo_url} alt="" className="w-8 h-8 rounded-full object-cover" />}
+                            <Avatar className="h-8 w-8 border border-border bg-secondary">
+                              {firm.logo_url && <AvatarImage src={firm.logo_url} alt={`${firm.name} logo`} className="object-contain" />}
+                              <AvatarFallback className="text-xs font-bold text-primary">
+                                {firm.name.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
                             {firm.name}
                           </TableCell>
                           <TableCell className="text-center text-success font-medium">{firm.approvals_count}</TableCell>
