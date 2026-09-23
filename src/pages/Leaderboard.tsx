@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import FilterChips from "@/components/FilterChips";
 import { CaseStatusCounts, emptyCounts, trustLabel, trustLabelClass, trustScore } from "@/lib/trust";
 import { Trophy } from "lucide-react";
-import PublicFooter from "@/components/PublicFooter";
-import LiveDataBadge from "@/components/LiveDataBadge";
 
 type Entry = {
   id: string;
@@ -74,19 +72,20 @@ const Leaderboard = () => {
   }, [entries, sortBy]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background to-card">
       <Seo
         title="Contributor Leaderboard | Payout Cases"
         description="Top payout case contributors ranked by community trust score, verified submissions and confirmed proof."
         path="/leaderboard"
       />
       <Navbar />
-      <header className="bg-obsidian text-ivory"><div className="container mx-auto px-4 pt-32 pb-14 max-w-4xl"><LiveDataBadge /><div className="mt-5 mb-2">
-          <h1 className="text-5xl font-extrabold flex items-center gap-3">
+      <div className="container mx-auto px-4 pt-24 pb-12 max-w-3xl">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 gradient-text-primary flex items-center gap-3">
             <Trophy className="w-9 h-9" /> Leaderboard
           </h1>
-          <p className="mt-4 text-ivory-muted">Contributors ranked by evidence quality and community trust.</p>
-        </div></div></header><div className="container mx-auto px-4 py-12 max-w-4xl">
+          <p className="text-muted-foreground">Top contributors ranked by trust score.</p>
+        </div>
 
         <FilterChips
           label="Rank contributors by"
@@ -104,13 +103,13 @@ const Leaderboard = () => {
         ) : sorted.length === 0 ? (
           <p className="text-center text-muted-foreground py-12">No contributors yet</p>
         ) : (
-          <div className="overflow-hidden border-y border-border divide-y divide-border">
+          <div className="glass rounded-xl overflow-hidden divide-y divide-border">
             {sorted.map((e, i) => (
               <div key={e.id} className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/30 transition-colors">
                 <span className={`font-mono w-8 text-sm ${i < 3 ? "text-warning font-bold" : "text-muted-foreground"}`}>
                   {i + 1}
                 </span>
-                <div className="w-9 h-9 rounded-sm bg-secondary text-foreground flex items-center justify-center text-xs font-bold">
+                <div className="w-9 h-9 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold">
                   {(e.username || "?").slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -126,12 +125,12 @@ const Leaderboard = () => {
                   </p>
                 </div>
                 <Badge variant="outline" className={trustLabelClass(e.score)}>{trustLabel(e.score)}</Badge>
-                <span className="font-mono text-success text-lg w-10 text-right">{e.score}</span>
+                <span className="font-mono text-primary text-lg w-10 text-right">{e.score}</span>
               </div>
             ))}
           </div>
         )}
-      </div><PublicFooter />
+      </div>
     </div>
   );
 };

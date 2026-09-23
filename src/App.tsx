@@ -13,7 +13,6 @@ import Auth from "./pages/Auth";
 import UserProfile from "./pages/UserProfile";
 import Leaderboard from "./pages/Leaderboard";
 import Notifications from "./pages/Notifications";
-import Proofs from "./pages/Proofs";
 import NotFound from "./pages/NotFound";
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -44,7 +43,6 @@ const App = () => (
           <Route path="/users/:username" element={<UserProfile />} />
           <Route path="/me" element={<UserProfile self />} />
           <Route path="/notifications" element={<Notifications />} />
-          <Route path="/proofs" element={<Proofs />} />
           <Route path="/submit" element={<ProtectedRoute requireAuth><SubmitCase /></ProtectedRoute>} />
           
           {/* Admin Routes */}
