@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { User, Loader2 } from 'lucide-react';
+import { ShieldCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import ParticleBackground from '@/components/ParticleBackground';
 import Seo from '@/components/Seo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import payoutCasesLogo from '@/assets/payout-cases-logo.png.asset.json';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -55,27 +55,23 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
+    <div className="financial-grid min-h-screen flex items-center justify-center relative overflow-hidden bg-obsidian text-ivory">
       <Seo
         title="Sign In or Register | Payout Cases"
         description="Sign in or create a free Payout Cases account to submit and track proprietary trading firm payout cases."
         path="/auth"
       />
-      <ParticleBackground />
-      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md p-8 glass-card rounded-2xl relative z-10 m-4"
+        className="w-full max-w-md border border-ivory/15 bg-card p-8 text-card-foreground shadow-premium relative z-10 m-4"
       >
         <div className="flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-            <User className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-3xl font-bold gradient-text-primary text-center">
-            Welcome to Payout Cases — Sign In or Register
+          <img src={payoutCasesLogo.url} alt="Payout Cases" className="mb-6 h-16 w-auto object-contain" />
+          <h1 className="text-3xl font-extrabold text-center">
+            Access the intelligence platform
           </h1>
-          <p className="text-muted-foreground mt-2">Login or create an account</p>
+          <p className="text-muted-foreground mt-2 flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-success" /> Secure contributor access</p>
         </div>
 
         <Tabs defaultValue="login" className="w-full">

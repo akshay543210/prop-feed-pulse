@@ -28,6 +28,7 @@ import {
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import PublicFooter from "@/components/PublicFooter";
 
 const STEPS = ["Firm", "Outcome", "Proof", "Review"];
 
@@ -133,7 +134,7 @@ const SubmitCase = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
+    <div className="min-h-screen bg-background">
       <Seo
         title="Submit a Payout Case | Payout Cases"
         description="Report your prop firm payout approval or denial with proof, and help traders see which firms actually pay out."
@@ -143,7 +144,7 @@ const SubmitCase = () => {
 
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-3 gradient-approval-text flex items-center justify-center">
+          <p className="section-kicker justify-center"><ShieldCheck className="h-4 w-4" /> Evidence submission</p><h1 className="text-4xl font-extrabold mb-3 flex items-center justify-center">
             <PlusCircle className="w-9 h-9 mr-3" />
             Submit Payout Case
           </h1>
@@ -167,7 +168,7 @@ const SubmitCase = () => {
           ))}
         </div>
 
-        <Card className="glass p-8">
+        <Card className="border-border bg-card p-8 shadow-premium">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -206,7 +207,7 @@ const SubmitCase = () => {
                         aria-pressed={formData.status === "approved"}
                         onClick={() => setFormData({ ...formData, status: "approved" })}
                         className={cn(
-                          "rounded-xl border p-4 flex flex-col items-center gap-2 transition-colors",
+                           "rounded-sm border p-4 flex flex-col items-center gap-2 transition-colors",
                           formData.status === "approved"
                             ? "border-success bg-success/10 text-success"
                             : "border-border hover:border-success/50"
@@ -219,7 +220,7 @@ const SubmitCase = () => {
                         aria-pressed={formData.status === "denied"}
                         onClick={() => setFormData({ ...formData, status: "denied" })}
                         className={cn(
-                          "rounded-xl border p-4 flex flex-col items-center gap-2 transition-colors",
+                           "rounded-sm border p-4 flex flex-col items-center gap-2 transition-colors",
                           formData.status === "denied"
                             ? "border-destructive bg-destructive/10 text-destructive"
                             : "border-border hover:border-destructive/50"
@@ -273,11 +274,10 @@ const SubmitCase = () => {
 
               {step === 2 && (
                 <>
-                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex gap-3">
+                  <div className="rounded-sm border border-primary/30 bg-primary/5 p-4 flex gap-3">
                     <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                     <p className="text-sm text-muted-foreground">
-                      Add a public X/Twitter post link and your case is{" "}
-                      <span className="text-primary font-semibold">instantly verified</span> instead of pending.
+                       Add a public X/Twitter post link as stronger supporting evidence. Its verification state follows current platform rules.
                     </p>
                   </div>
 
@@ -328,11 +328,11 @@ const SubmitCase = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-bold">Review your case</h2>
-                    <Badge variant="outline" className={instantVerified ? "text-primary border-primary/50" : ""}>
-                      {instantVerified ? "Will be Verified" : "Will be Pending"}
+                     <Badge variant="outline" className={instantVerified ? "text-success border-success/50" : ""}>
+                       {instantVerified ? "Social proof supplied" : "Reported record"}
                     </Badge>
                   </div>
-                  <dl className="divide-y divide-border rounded-xl border border-border">
+                  <dl className="divide-y divide-border rounded-sm border border-border">
                     {[
                       ["Firm", firmName || "—"],
                       ["Outcome", formData.status === "approved" ? "Approved" : formData.status === "denied" ? "Denied" : "—"],
@@ -360,7 +360,7 @@ const SubmitCase = () => {
               </Button>
             )}
             {step < STEPS.length - 1 ? (
-              <Button type="button" onClick={next} className="flex-1 bg-gradient-to-r from-primary to-success">
+              <Button type="button" onClick={next} className="flex-1">
                 Continue <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
@@ -368,14 +368,14 @@ const SubmitCase = () => {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="flex-1 bg-gradient-to-r from-primary to-success"
+                className="flex-1"
               >
                 {isSubmitting ? "Submitting..." : (<><Upload className="w-4 h-4 mr-2" /> Submit Case</>)}
               </Button>
             )}
           </div>
         </Card>
-      </div>
+      </div><PublicFooter />
     </div>
   );
 };
