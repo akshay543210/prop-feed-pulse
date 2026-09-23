@@ -55,6 +55,15 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        obsidian: {
+          DEFAULT: "hsl(var(--obsidian))",
+          muted: "hsl(var(--obsidian-muted))",
+        },
+        ivory: {
+          DEFAULT: "hsl(var(--ivory))",
+          muted: "hsl(var(--ivory-muted))",
+        },
+        metal: "hsl(var(--metal))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -70,6 +79,9 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        premium: "var(--glow-card)",
       },
       keyframes: {
         "accordion-down": {

@@ -1,253 +1,46 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { Bell, LogOut, Menu, User, UserCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut, Bell, UserCircle } from "lucide-react";
-import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import SubmitCaseButton from "@/components/SubmitCaseButton";
+import LiveDataBadge from "@/components/LiveDataBadge";
 import payoutCasesLogo from "@/assets/payout-cases-logo.png.asset.json";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+const NAV = [
+  { label: "Approvals", to: "/approvals" }, { label: "Denials", to: "/denials" },
+  { label: "Explore Firms", to: "/firms" }, { label: "Payout Proofs", to: "/proofs" }, { label: "Stats", to: "/#statistics" },
+];
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [compact, setCompact] = useState(false);
   const { user, signOut } = useAuth();
+  useEffect(() => { const onScroll = () => setCompact(window.scrollY > 24); onScroll(); window.addEventListener("scroll", onScroll, { passive: true }); return () => window.removeEventListener("scroll", onScroll); }, []);
+  const active = (to: string) => to.startsWith("/#") ? false : location.pathname === to;
+  const handleSignOut = async () => { const { error } = await signOut(); if (error) toast.error("Failed to sign out"); else { toast.success("Signed out"); navigate("/"); } };
 
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error('Failed to sign out');
-    } else {
-      toast.success('Signed out successfully');
-      navigate('/');
-    }
-  };
-  
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-
-  return (
-    <motion.nav 
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 w-full z-50 glass-strong border-b border-border/50"
-    >
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="block hover:scale-105 transition-transform" aria-label="Payout Cases home">
-            <img
-              src={payoutCasesLogo.url}
-              alt="Payout Cases"
-              className="h-11 w-auto max-w-[156px] rounded-sm object-contain"
-            />
-          </Link>
-          
-          <div className="hidden md:flex items-center gap-8">
-            <Link 
-              to="/" 
-              className={`relative transition-colors text-sm font-medium ${
-                isActive('/') ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Home
-              {isActive('/') && (
-                <motion.div
-                  layoutId="navbar-indicator"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
-                />
-              )}
-            </Link>
-            <Link 
-              to="/firms" 
-              className={`relative transition-colors text-sm font-medium ${
-                isActive('/firms') ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Firms
-              {isActive('/firms') && (
-                <motion.div
-                  layoutId="navbar-indicator"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
-                />
-              )}
-            </Link>
-            <Link 
-              to="/approvals" 
-              className={`relative transition-colors text-sm font-medium ${
-                isActive('/approvals') ? 'text-success' : 'text-foreground hover:text-success'
-              }`}
-            >
-              Approvals
-              {isActive('/approvals') && (
-                <motion.div
-                  layoutId="navbar-indicator"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-success"
-                />
-              )}
-            </Link>
-            <Link 
-              to="/denials" 
-              className={`relative transition-colors text-sm font-medium ${
-                isActive('/denials') ? 'text-destructive' : 'text-foreground hover:text-destructive'
-              }`}
-            >
-              Denials
-              {isActive('/denials') && (
-                <motion.div
-                  layoutId="navbar-indicator"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-destructive"
-                />
-              )}
-            </Link>
-            <Link
-              to="/leaderboard"
-              className={`relative transition-colors text-sm font-medium ${
-                isActive('/leaderboard') ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}
-            >
-              Leaderboard
-              {isActive('/leaderboard') && (
-                <motion.div
-                  layoutId="navbar-indicator"
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
-                />
-              )}
-            </Link>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <SubmitCaseButton className="bg-gradient-to-r from-primary to-accent rounded-xl">
-                Submit Case
-              </SubmitCaseButton>
-            </motion.div>
-            {user ? (
-              <>
-                <Button asChild variant="ghost" size="icon" className="rounded-full" aria-label="Notifications">
-                  <Link to="/notifications"><Bell className="h-5 w-5" /></Link>
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full" aria-label="Open account menu">
-                      <User className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="glass-card">
-                    <DropdownMenuItem onClick={() => navigate('/notifications')}>
-                      <Bell className="mr-2 h-4 w-4" />
-                      Notifications
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate('/me')}>
-                      <UserCircle className="mr-2 h-4 w-4" />
-                      My Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button asChild className="bg-gradient-to-r from-primary to-accent rounded-xl">
-                  <Link to="/auth">Login / Sign Up</Link>
-                </Button>
-              </motion.div>
-            )}
-          </div>
-
-          <button
-            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={mobileMenuOpen}
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden mt-4 space-y-4"
-          >
-            <Link 
-              to="/" 
-              className="block py-2 text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/firms" 
-              className="block py-2 text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Firms
-            </Link>
-            <Link 
-              to="/approvals" 
-              className="block py-2 text-sm font-medium text-success"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Approvals
-            </Link>
-            <Link 
-              to="/denials" 
-              className="block py-2 text-sm font-medium text-destructive"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Denials
-            </Link>
-            <Link
-              to="/leaderboard"
-              className="block py-2 text-sm font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Leaderboard
-            </Link>
-            <SubmitCaseButton className="w-full">Submit Case</SubmitCaseButton>
-            {user ? (
-              <>
-                <Button asChild variant="outline" className="w-full">
-                  <Link to="/notifications" onClick={() => setMobileMenuOpen(false)}>
-                    Notifications
-                  </Link>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    handleSignOut();
-                  }}
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
-              </>
-            ) : (
-              <Button asChild className="w-full">
-                <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
-                  Login / Sign Up
-                </Link>
-              </Button>
-            )}
-          </motion.div>
-        )}
+  return <motion.nav initial={{ y: -70 }} animate={{ y: 0 }} className={`fixed inset-x-0 top-0 z-50 border-b text-ivory transition-all duration-300 ${compact ? "border-border/70 bg-obsidian/95 py-1 backdrop-blur-xl" : "border-ivory/10 bg-obsidian py-2"}`}>
+    <div className="container mx-auto flex h-16 items-center justify-between px-4">
+      <Link to="/" aria-label="Payout Cases home" className="shrink-0"><img src={payoutCasesLogo.url} alt="Payout Cases" className="h-10 w-auto max-w-[145px] object-contain" /></Link>
+      <div className="hidden items-center gap-6 lg:flex">
+        <LiveDataBadge />
+        <div className="h-5 w-px bg-ivory/15" />
+        {NAV.map((item) => <Link key={item.label} to={item.to} className={`story-link py-2 text-xs font-semibold transition-colors ${active(item.to) ? "text-ivory" : "text-ivory-muted hover:text-ivory"}`}>{item.label}</Link>)}
       </div>
-    </motion.nav>
-  );
+      <div className="hidden items-center gap-2 md:flex">
+        <SubmitCaseButton size="sm" className="bg-ivory text-obsidian hover:bg-success hover:text-success-foreground">Submit a Case</SubmitCaseButton>
+        {user ? <><Button asChild variant="ghost" size="icon" className="text-ivory-muted hover:text-ivory"><Link to="/notifications"><Bell /></Link></Button><DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="text-ivory-muted hover:text-ivory"><User /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onClick={() => navigate("/me")}><UserCircle className="mr-2" />Profile</DropdownMenuItem><DropdownMenuItem onClick={handleSignOut}><LogOut className="mr-2" />Sign out</DropdownMenuItem></DropdownMenuContent></DropdownMenu></> : <Button asChild variant="ghost" size="sm" className="text-ivory-muted hover:text-ivory"><Link to="/auth">Sign in</Link></Button>}
+      </div>
+      <Button variant="ghost" size="icon" className="text-ivory md:hidden" onClick={() => setOpen((value) => !value)} aria-label={open ? "Close navigation" : "Open navigation"}>{open ? <X /> : <Menu />}</Button>
+    </div>
+    <AnimatePresence>{open && <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="border-t border-ivory/10 bg-obsidian px-4 pb-5 md:hidden"><div className="grid gap-1 pt-3">{NAV.map((item) => <Link key={item.label} to={item.to} onClick={() => setOpen(false)} className="border-b border-ivory/10 py-3 text-sm text-ivory-muted">{item.label}</Link>)}<SubmitCaseButton className="mt-3 w-full bg-ivory text-obsidian">Submit a Case</SubmitCaseButton><Button asChild variant="ghost" className="w-full text-ivory"><Link to={user ? "/me" : "/auth"}>{user ? "My profile" : "Sign in"}</Link></Button></div></motion.div>}</AnimatePresence>
+  </motion.nav>;
 };
 
 export default Navbar;

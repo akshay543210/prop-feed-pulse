@@ -1,314 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { ExternalLink, Heart, Search, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
+import PublicFooter from "@/components/PublicFooter";
 import Seo from "@/components/Seo";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Search, Star, LayoutGrid, List, ExternalLink, Heart } from "lucide-react";
-import FilterChips from "@/components/FilterChips";
+import LiveDataBadge from "@/components/LiveDataBadge";
 import TrendBadge from "@/components/TrendBadge";
-import { avgPayoutDays, formatDays, groupByFirm, trendDelta } from "@/lib/stats";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { format } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
+import { approvalRate, avgPayoutDays, formatDays, groupByFirm, trendDelta } from "@/lib/stats";
+import { formatDistanceToNow } from "date-fns";
 
 const Firms = () => {
-  const { toast } = useToast();
   const { user } = useAuth();
-  const [firms, setFirms] = useState<any[]>([]);
-  const [filteredFirms, setFilteredFirms] = useState<any[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("approvals");
-  const [view, setView] = useState<"table" | "card">("table");
-  const [onlyFollowing, setOnlyFollowing] = useState(false);
-  const [followedIds, setFollowedIds] = useState<string[]>([]);
-  const [firmCases, setFirmCases] = useState<Record<string, any[]>>({});
+  const [firms, setFirms] = useState<any[]>([]); const [cases, setCases] = useState<any[]>([]);
+  const [query, setQuery] = useState(""); const [sort, setSort] = useState("verified"); const [followed, setFollowed] = useState<string[]>([]); const [onlyFollowing, setOnlyFollowing] = useState(false);
+  const load = async () => { const [{ data: firmData }, { data: caseData }] = await Promise.all([supabase.from("firms").select("*"), supabase.from("payout_cases").select("firm_id, status, amount, created_at, payout_date, verification_status")]); setFirms(firmData || []); setCases(caseData || []); };
+  useEffect(() => { load(); const channel = supabase.channel("firm-directory-live").on("postgres_changes", { event: "*", schema: "public", table: "payout_cases" }, load).on("postgres_changes", { event: "*", schema: "public", table: "firms" }, load).subscribe(); return () => { supabase.removeChannel(channel); }; }, []);
+  useEffect(() => { if (!user) { setFollowed([]); return; } supabase.from("firm_follows").select("firm_id").eq("user_id", user.id).then(({ data }) => setFollowed((data || []).map((item) => item.firm_id))); }, [user]);
+  const grouped = useMemo(() => groupByFirm(cases), [cases]);
+  const visible = useMemo(() => firms.map((firm) => { const list = grouped[firm.id] || []; const verifiedApprovals = list.filter((item) => item.status === "approved" && ["verified", "community_confirmed"].includes(item.verification_status)); const reportedDenials = list.filter((item) => item.status === "denied"); return { firm, list, verifiedApprovals, reportedDenials, rate: approvalRate(list), avg: avgPayoutDays(list), trend: trendDelta(list), latest: verifiedApprovals.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0] }; }).filter((item) => item.verifiedApprovals.length > 0 && item.firm.name.toLowerCase().includes(query.toLowerCase()) && (!onlyFollowing || followed.includes(item.firm.id))).sort((a, b) => sort === "ratio" ? b.rate - a.rate : sort === "fastest" ? (a.avg ?? Infinity) - (b.avg ?? Infinity) : sort === "activity" ? b.list.length - a.list.length : b.verifiedApprovals.length - a.verifiedApprovals.length), [firms, grouped, query, onlyFollowing, followed, sort]);
 
-  useEffect(() => {
-    fetchFirms();
-    fetchCases();
-    
-    const channel = supabase
-      .channel('firms-live-feed')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'firms' }, (payload) => {
-        setFirms(prev => prev.map(f => f.id === payload.new.id ? payload.new : f));
-      })
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, []);
-
-  useEffect(() => {
-    const loadFollows = async () => {
-      if (!user) { setFollowedIds([]); setOnlyFollowing(false); return; }
-      const { data } = await supabase.from('firm_follows').select('firm_id').eq('user_id', user.id);
-      setFollowedIds((data || []).map((f) => f.firm_id));
-    };
-    loadFollows();
-  }, [user]);
-
-  useEffect(() => { filterAndSortFirms(); }, [firms, searchQuery, sortBy, onlyFollowing, followedIds, firmCases]);
-
-  const fetchCases = async () => {
-    const { data } = await supabase
-      .from('payout_cases')
-      .select('firm_id, status, created_at, payout_date');
-    setFirmCases(groupByFirm(data || []));
-  };
-
-  const statsFor = (firmId: string) => {
-    const list = firmCases[firmId] || [];
-    return { avg: avgPayoutDays(list), trend: trendDelta(list), volume: list.length };
-  };
-
-  const fetchFirms = async () => {
-    try {
-      const { data, error } = await supabase.from('firms').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
-      setFirms(data || []);
-    } catch (error: any) {
-      toast({ title: "Error fetching firms", description: error.message, variant: "destructive" });
-    }
-  };
-
-  const filterAndSortFirms = () => {
-    let filtered = firms.filter(firm => firm.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    if (onlyFollowing) filtered = filtered.filter(firm => followedIds.includes(firm.id));
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "approvals": return b.approvals_count - a.approvals_count;
-        case "denials": return b.denials_count - a.denials_count;
-        case "cases":
-          return (b.approvals_count + b.denials_count) - (a.approvals_count + a.denials_count);
-        case "fastest": {
-          const aAvg = statsFor(a.id).avg;
-          const bAvg = statsFor(b.id).avg;
-          if (aAvg === null) return 1;
-          if (bAvg === null) return -1;
-          return aAvg - bAvg;
-        }
-        case "trending_down": {
-          const aT = statsFor(a.id).trend;
-          const bT = statsFor(b.id).trend;
-          if (aT === null) return 1;
-          if (bT === null) return -1;
-          return aT - bT;
-        }
-        case "ratio":
-          const ratioA = a.approvals_count / (a.approvals_count + a.denials_count) || 0;
-          const ratioB = b.approvals_count / (b.approvals_count + b.denials_count) || 0;
-          return ratioB - ratioA;
-        default: return 0;
-      }
-    });
-    setFilteredFirms(filtered);
-  };
-
-  const getRating = (firm: any) => {
-    const total = firm.approvals_count + firm.denials_count;
-    if (total === 0) return 0;
-    const ratio = firm.approvals_count / total;
-    if (ratio >= 0.9) return 5;
-    if (ratio >= 0.75) return 4;
-    if (ratio >= 0.5) return 3;
-    if (ratio >= 0.25) return 2;
-    return 1;
-  };
-
-  const RatingStars = ({ rating }: { rating: number }) => (
-    <div className="flex items-center">
-      {[...Array(5)].map((_, i) => (
-        <Star key={i} className={`w-3.5 h-3.5 ${i < rating ? "fill-primary text-primary" : "text-muted"}`} />
-      ))}
-    </div>
-  );
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
-      <Seo
-        title="Proprietary Trading Firms | Payout Cases"
-        description="Compare proprietary trading firms by payout approval rate, approvals and denials, updated in real time from verified community cases."
-        path="/firms"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "CollectionPage",
-          name: "Proprietary Trading Firms",
-          url: "https://payoutcases.lovable.app/firms",
-          description:
-            "Directory of proprietary trading firms ranked by payout approval performance.",
-        }}
-      />
-      <Navbar />
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 gradient-approval-text">PropFirms Performance Tracker</h1>
-          <p className="text-muted-foreground">Live feed of all prop firms with real-time payout performance tracking</p>
-        </div>
-
-        {/* Search, Filter & View Toggle */}
-        <div className="glass p-6 rounded-lg mb-8">
-          <div className="flex flex-col md:flex-row gap-4 items-center">
-            <div className="flex-1 relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input placeholder="Search firms..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
-            </div>
-            <div className="flex gap-1 border border-border rounded-lg p-1">
-              <Button
-                variant={onlyFollowing ? "default" : "ghost"}
-                size="icon"
-                aria-label="Show only firms you follow"
-                aria-pressed={onlyFollowing}
-                onClick={() => setOnlyFollowing((v) => !v)}
-                className="h-8 w-8"
-                disabled={!user}
-              >
-                <Heart className={`h-4 w-4 ${onlyFollowing ? "fill-current" : ""}`} />
-              </Button>
-              <Button variant={view === "table" ? "default" : "ghost"} size="icon" aria-label="Switch to table view" aria-pressed={view === "table"} onClick={() => setView("table")} className="h-8 w-8">
-                <List className="h-4 w-4" />
-              </Button>
-              <Button variant={view === "card" ? "default" : "ghost"} size="icon" aria-label="Switch to card view" aria-pressed={view === "card"} onClick={() => setView("card")} className="h-8 w-8">
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <FilterChips
-          label="Sort firms"
-          value={sortBy}
-          onChange={setSortBy}
-          options={[
-            { value: "approvals", label: "Most approved" },
-            { value: "ratio", label: "Best approval rate" },
-            { value: "cases", label: "Most cases" },
-            { value: "fastest", label: "Fastest payout" },
-            { value: "trending_down", label: "Trending down" },
-            { value: "denials", label: "Most denied" },
-          ]}
-        />
-
-        <AnimatePresence mode="wait">
-          {view === "table" ? (
-            <motion.div key="table" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-              <div className="glass rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-border hover:bg-transparent">
-                      <TableHead className="text-muted-foreground">Firm</TableHead>
-                      <TableHead className="text-muted-foreground text-center">Approvals</TableHead>
-                      <TableHead className="text-muted-foreground text-center">Denials</TableHead>
-                      <TableHead className="text-muted-foreground text-center">Approval Rate</TableHead>
-                      <TableHead className="text-muted-foreground text-center">Avg Payout Time</TableHead>
-                      <TableHead className="text-muted-foreground text-center">Trend</TableHead>
-                      <TableHead className="text-muted-foreground text-center">Rating</TableHead>
-                      <TableHead className="text-muted-foreground">Website</TableHead>
-                      <TableHead className="text-muted-foreground">Created</TableHead>
-                      <TableHead className="text-muted-foreground text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredFirms.map((firm) => {
-                      const total = firm.approvals_count + firm.denials_count;
-                      const rate = total > 0 ? ((firm.approvals_count / total) * 100).toFixed(1) : "0.0";
-                      const s = statsFor(firm.id);
-                      return (
-                        <TableRow key={firm.id} className="border-border hover:bg-secondary/30 transition-colors">
-                          <TableCell className="font-semibold flex items-center gap-3">
-                            <Avatar className="h-8 w-8 border border-border bg-secondary">
-                              {firm.logo_url && <AvatarImage src={firm.logo_url} alt={`${firm.name} logo`} className="object-contain" />}
-                              <AvatarFallback className="text-xs font-bold text-primary">
-                                {firm.name.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            {firm.name}
-                          </TableCell>
-                          <TableCell className="text-center text-success font-medium">{firm.approvals_count}</TableCell>
-                          <TableCell className="text-center text-destructive font-medium">{firm.denials_count}</TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-primary to-success" style={{ width: `${rate}%` }} />
-                              </div>
-                              <span className="text-xs text-muted-foreground">{rate}%</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-center text-sm text-muted-foreground font-mono">{formatDays(s.avg)}</TableCell>
-                          <TableCell className="text-center"><TrendBadge delta={s.trend} /></TableCell>
-                          <TableCell className="text-center"><RatingStars rating={getRating(firm)} /></TableCell>
-                          <TableCell>
-                            {firm.website && (
-                              <a href={firm.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1 text-sm">
-                                <ExternalLink className="h-3 w-3" /> Visit
-                              </a>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">{format(new Date(firm.created_at), 'MMM dd, yyyy')}</TableCell>
-                          <TableCell className="text-right">
-                            <Button asChild size="sm" variant="outline">
-                              <Link to={`/firms/${firm.id}`}>View Details</Link>
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div key="card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredFirms.map((firm) => {
-                  const totalCases = firm.approvals_count + firm.denials_count;
-                  const approvalRatio = totalCases > 0 ? (firm.approvals_count / totalCases) * 100 : 0;
-                  const rating = getRating(firm);
-                  return (
-                    <Card key={firm.id} className="glass p-6 transition-smooth hover:scale-105 hover:glow-approval">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold mb-1">{firm.name}</h3>
-                          <RatingStars rating={rating} />
-                        </div>
-                      </div>
-                      {firm.description && <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{firm.description}</p>}
-                      <div className="space-y-3 mb-4">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-success">✓ {firm.approvals_count} Approved</span>
-                          <span className="text-destructive">✗ {firm.denials_count} Denied</span>
-                        </div>
-                        <div className="w-full h-3 bg-card rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-primary to-success transition-all duration-500" style={{ width: `${approvalRatio}%` }} />
-                        </div>
-                        <p className="text-center text-sm font-semibold">{approvalRatio.toFixed(1)}% Approval Rate</p>
-                      </div>
-                      <Button asChild className="w-full"><Link to={`/firms/${firm.id}`}>View Details</Link></Button>
-                    </Card>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {filteredFirms.length === 0 && (
-          <div className="text-center py-12"><p className="text-muted-foreground">No firms found matching your criteria</p></div>
-        )}
-      </div>
-    </div>
-  );
+  return <div className="min-h-screen bg-background"><Seo title="Explore Prop Firms | Payout Cases" description="Explore firms with verified payout activity tracked by Payout Cases." path="/firms" /><Navbar />
+    <header className="bg-obsidian text-ivory"><div className="container mx-auto px-4 pb-16 pt-32"><LiveDataBadge /><h1 className="mt-5 text-5xl font-extrabold md:text-7xl">Explore Prop Firms</h1><p className="mt-5 max-w-2xl text-lg text-ivory-muted">Explore firms with verified payout activity tracked by Payout Cases.</p></div></header>
+    <main className="container mx-auto px-4 py-12"><div className="mb-10 grid gap-3 border-y border-border py-4 md:grid-cols-[1fr_220px_auto]"><div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search eligible firms" className="pl-9" /></div><Select value={sort} onValueChange={setSort}><SelectTrigger><SlidersHorizontal className="mr-2 h-4 w-4" /><SelectValue /></SelectTrigger><SelectContent><SelectItem value="verified">Most verified payouts</SelectItem><SelectItem value="ratio">Best approval ratio</SelectItem><SelectItem value="activity">Most activity</SelectItem><SelectItem value="fastest">Fastest payout</SelectItem></SelectContent></Select><Button variant={onlyFollowing ? "default" : "outline"} disabled={!user} onClick={() => setOnlyFollowing((value) => !value)}><Heart className={onlyFollowing ? "fill-current" : ""} /> Following</Button></div>
+      <div className="mb-7 flex items-center justify-between"><p className="font-mono text-xs uppercase text-muted-foreground">{visible.length} publicly eligible firms</p><p className="text-xs text-muted-foreground">Eligibility requires a verified approval</p></div>
+      <div className="grid gap-px bg-border lg:grid-cols-2">{visible.map(({ firm, list, verifiedApprovals, reportedDenials, rate, avg, trend, latest }) => <article key={firm.id} className="group bg-card p-7 transition-all hover:relative hover:z-10 hover:-translate-y-0.5 hover:shadow-premium"><div className="flex items-start justify-between gap-5"><div className="flex min-w-0 gap-4"><Avatar className="h-14 w-14 rounded-sm border border-border bg-secondary"><AvatarImage src={firm.logo_url || undefined} className="object-contain transition-transform group-hover:scale-105" /><AvatarFallback className="rounded-sm font-bold">{firm.name.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar><div><h2 className="text-xl font-bold">{firm.name}</h2>{firm.website && <a href={firm.website} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary">Official website <ExternalLink className="h-3 w-3" /></a>}</div></div><TrendBadge delta={trend} /></div>
+        <div className="mt-8 grid grid-cols-2 gap-6"><div><p className="data-label">Verified payouts</p><p className="mt-2 font-mono text-2xl font-semibold text-success">{verifiedApprovals.length}</p></div><div><p className="data-label">Reported denials</p><p className="mt-2 font-mono text-2xl font-semibold text-destructive">{reportedDenials.length}</p></div></div>
+        <div className="mt-8"><div className="flex items-end justify-between"><div><p className="font-mono text-4xl font-semibold">{rate.toFixed(1)}%</p><p className="data-label mt-2">Approval ratio</p></div><p className="font-mono text-xs text-muted-foreground">Avg {formatDays(avg)}</p></div><div className="mt-4 h-1 bg-secondary"><div className="h-full bg-success transition-all duration-700" style={{ width: `${rate}%` }} /></div></div>
+        <div className="mt-8 flex items-end justify-between border-t border-border pt-5"><div><p className="data-label">Last verified payout</p><p className="mt-1 text-sm">{latest ? formatDistanceToNow(new Date(latest.created_at), { addSuffix: true }) : "—"}</p></div><Button asChild variant="link" className="px-0"><Link to={`/firms/${firm.id}`}>View firm <span className="transition-transform group-hover:translate-x-1">→</span></Link></Button></div>
+      </article>)}</div>{!visible.length && <div className="py-24 text-center"><p className="text-lg font-semibold">No eligible firms match this view</p><p className="mt-2 text-sm text-muted-foreground">A firm appears after its first verified payout approval.</p></div>}</main><PublicFooter /></div>;
 };
 
 export default Firms;
