@@ -1,35 +1,11 @@
 import { motion } from 'framer-motion';
 import { Twitter, Send, MessageCircle } from 'lucide-react';
+import payoutCasesLogo from '@/assets/payout-cases-logo.png.asset.json';
 
 const WaveFooter = () => {
   return (
-    <footer className="relative mt-32 overflow-hidden">
-      {/* Animated Wave Background */}
-      <div className="absolute inset-0 z-0">
-        <svg
-          className="absolute bottom-0 w-full"
-          viewBox="0 0 1440 200"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <motion.path
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 2, ease: 'easeInOut' }}
-            fill="url(#wave-gradient)"
-            d="M0,64L48,80C96,96,192,128,288,128C384,128,480,96,576,90.7C672,85,768,107,864,112C960,117,1056,107,1152,101.3C1248,96,1344,96,1392,96L1440,96L1440,200L1392,200C1344,200,1248,200,1152,200C1056,200,960,200,864,200C768,200,672,200,576,200C480,200,384,200,288,200C192,200,96,200,48,200L0,200Z"
-          />
-          <defs>
-            <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="hsl(195 100% 50% / 0.2)" />
-              <stop offset="50%" stopColor="hsl(180 100% 45% / 0.3)" />
-              <stop offset="100%" stopColor="hsl(195 100% 50% / 0.2)" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 glass-strong">
+    <footer className="relative overflow-hidden dark-band border-t border-primary/20">
+      <div className="relative z-10">
         <div className="container mx-auto px-4 py-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             {/* Brand */}
@@ -39,9 +15,7 @@ const WaveFooter = () => {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <h3 className="text-2xl font-bold gradient-text-primary mb-4">
-                Payout Cases
-              </h3>
+              <img src={payoutCasesLogo.url} alt="Payout Cases" className="h-12 w-auto object-contain brightness-0 invert mb-4" />
               <p className="text-muted-foreground text-sm">
                 Premium real-time analytics for proprietary trading firm payouts.
                 Track, analyze, and make informed decisions.

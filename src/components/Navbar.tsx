@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Menu, User, LogOut, Bell, UserCircle } from "lucide-react";
+import { Menu, User, LogOut, Bell, UserCircle, Send, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -39,19 +39,19 @@ const Navbar = () => {
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed top-0 w-full z-50 glass-strong border-b border-border/50"
+      className="fixed top-0 w-full z-50 bg-background/95 backdrop-blur-xl border-b border-border/70 text-foreground"
     >
-      <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-2.5">
         <div className="flex items-center justify-between">
           <Link to="/" className="block hover:scale-105 transition-transform" aria-label="Payout Cases home">
             <img
               src={payoutCasesLogo.url}
               alt="Payout Cases"
-              className="h-11 w-auto max-w-[156px] rounded-sm object-contain"
+               className="h-10 w-auto max-w-[150px] rounded-sm object-contain"
             />
           </Link>
           
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6">
             <Link 
               to="/" 
               className={`relative transition-colors text-sm font-medium ${
@@ -122,9 +122,9 @@ const Navbar = () => {
                 />
               )}
             </Link>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <SubmitCaseButton className="bg-gradient-to-r from-primary to-accent rounded-xl">
-                Submit Case
+              <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.98 }}>
+               <SubmitCaseButton className="rounded-md px-5">
+                 <Send className="h-4 w-4" /> Submit a Case
               </SubmitCaseButton>
             </motion.div>
             {user ? (
@@ -156,7 +156,7 @@ const Navbar = () => {
               </>
             ) : (
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button asChild className="bg-gradient-to-r from-primary to-accent rounded-xl">
+                <Button asChild variant="outline" className="rounded-full">
                   <Link to="/auth">Login / Sign Up</Link>
                 </Button>
               </motion.div>
@@ -169,7 +169,7 @@ const Navbar = () => {
             className="md:hidden"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <Menu className="w-6 h-6" />
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
@@ -179,7 +179,7 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden mt-4 space-y-4"
+            className="md:hidden mt-3 space-y-2 border-t border-border pt-3 pb-2"
           >
             <Link 
               to="/" 
