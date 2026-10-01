@@ -20,10 +20,10 @@ const FilterChips = ({
           type="button"
           aria-pressed={active}
           onClick={() => onChange(o.value)}
-          className={`text-xs md:text-sm px-4 py-2 rounded-full border transition-colors ${
+          className={`text-xs md:text-sm px-4 py-2 rounded-md border transition-all ${
             active
-              ? "bg-primary text-primary-foreground border-primary font-semibold"
-              : "border-border text-muted-foreground hover:text-foreground hover:border-primary/40"
+              ? "bg-foreground text-background border-foreground font-semibold shadow-sm"
+              : "bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary"
           }`}
         >
           {o.label}

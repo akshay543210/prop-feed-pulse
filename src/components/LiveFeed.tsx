@@ -9,6 +9,7 @@ interface PayoutCase {
   firm_id: string;
   status: string;
   created_at: string;
+  amount?: number | string | null;
   firms: {
     name: string;
   };
@@ -72,20 +73,16 @@ const LiveFeed = () => {
   };
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full divide-y divide-primary/15">
       <AnimatePresence mode="popLayout">
         {displayedCases.map((payoutCase) => (
           <motion.div
             key={payoutCase.id}
-            initial={{ opacity: 0, x: -50, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: 50, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className={`glass-card p-4 rounded-xl border-l-4 ${
-              payoutCase.status === 'approved'
-                ? 'border-l-success'
-                : 'border-l-destructive'
-            }`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: .3 }}
+            className="py-3"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -95,20 +92,25 @@ const LiveFeed = () => {
                   <XCircle className="w-5 h-5 text-destructive" />
                 )}
                 <div>
-                  <p className="font-semibold text-sm">{payoutCase.firms.name}</p>
+                  <p className="font-semibold text-sm text-cream">{payoutCase.firms.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(payoutCase.created_at), 'MMM dd, HH:mm')}
                   </p>
                 </div>
               </div>
-              <div
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-sm font-semibold text-champagne">
+                  {payoutCase.amount ? `$${Number(payoutCase.amount).toLocaleString()}` : "—"}
+                </span>
+                <span
                 className={`px-3 py-1 rounded-full text-xs font-medium ${
                   payoutCase.status === 'approved'
                     ? 'bg-success/20 text-success'
                     : 'bg-destructive/20 text-destructive'
                 }`}
-              >
+                >
                 {payoutCase.status === 'approved' ? 'Approved' : 'Denied'}
+                </span>
               </div>
             </div>
           </motion.div>
