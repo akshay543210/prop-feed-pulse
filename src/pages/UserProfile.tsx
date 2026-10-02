@@ -64,7 +64,7 @@ const UserProfile = ({ self = false }: { self?: boolean }) => {
   const score = trustScore(counts);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
+    <div className="min-h-screen bg-background">
       <Seo
         title={profile ? `${profile.username} — Contributor Profile | Payout Cases` : "Contributor Profile | Payout Cases"}
         description={profile ? `Payout cases submitted by ${profile.username}, with verification statuses and community trust standing.` : "Contributor profile on Payout Cases."}
@@ -83,7 +83,7 @@ const UserProfile = ({ self = false }: { self?: boolean }) => {
           </div>
         ) : (
           <>
-            <Card className="glass p-8 mb-8">
+             <Card className="bg-card p-8 mb-8">
               <div className="flex flex-col md:flex-row md:items-center gap-6 justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
@@ -126,7 +126,7 @@ const UserProfile = ({ self = false }: { self?: boolean }) => {
             <h2 className="text-2xl font-bold mb-4">Submitted cases</h2>
             <div className="space-y-3">
               {cases.map((c) => (
-                <Card key={c.id} className="glass p-4 flex flex-wrap items-center justify-between gap-3">
+                <Card key={c.id} className="bg-card p-4 flex flex-wrap items-center justify-between gap-3 transition-all hover:border-primary/50">
                   <div>
                     <Link to={`/firms/${c.firm_id}`} className="font-semibold hover:underline">
                       {c.firms?.name || "Unknown firm"}

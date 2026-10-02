@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import ParticleBackground from '@/components/ParticleBackground';
 import Seo from '@/components/Seo';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -55,18 +54,17 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
+    <div className="market-texture min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
       <Seo
         title="Sign In or Register | Payout Cases"
         description="Sign in or create a free Payout Cases account to submit and track proprietary trading firm payout cases."
         path="/auth"
       />
-      <ParticleBackground />
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md p-8 glass-card rounded-2xl relative z-10 m-4"
+        className="w-full max-w-md p-8 bg-card border border-border shadow-2xl rounded-lg relative z-10 m-4"
       >
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">

@@ -53,10 +53,10 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
       <motion.aside
         initial={{ x: -280 }}
         animate={{ x: sidebarOpen ? 0 : -280 }}
-        className="fixed left-0 top-0 h-screen w-64 glass-strong border-r border-border z-50"
+        className="fixed left-0 top-0 h-screen w-64 dark-band border-r border-primary/20 z-50"
       >
         <div className="p-6">
-          <h1 className="text-2xl font-bold gradient-text-primary">Admin Panel</h1>
+          <h1 className="text-2xl font-bold text-champagne">Admin Panel</h1>
           <p className="text-muted-foreground text-sm mt-1">PayoutCases</p>
         </div>
 
@@ -97,7 +97,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
       {/* Main Content */}
       <div className={`flex-1 transition-all ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
-        <header className="h-16 glass-strong border-b border-border flex items-center px-6 sticky top-0 z-40">
+        <header className="h-16 bg-card/95 backdrop-blur-xl border-b border-border flex items-center px-6 sticky top-0 z-40">
           <Button
             variant="ghost"
             size="icon"

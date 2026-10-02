@@ -18,6 +18,8 @@ import CaseStatusBadge from "@/components/CaseStatusBadge";
 import CaseVoteButtons from "@/components/CaseVoteButtons";
 import SubmitterBadge from "@/components/SubmitterBadge";
 import { useSubmitters } from "@/hooks/useSubmitters";
+import ProofViewer from "@/components/ProofViewer";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const FirmDetail = () => {
   const { id } = useParams();
@@ -172,7 +174,7 @@ const FirmDetail = () => {
   );
 
   const CaseCard = ({ payoutCase, isApproval }: any) => (
-    <Card className={`glass p-6 transition-smooth hover:scale-105 ${payoutCase.verification_status === 'disputed' ? 'opacity-80 border-destructive/40' : ''} ${isApproval ? 'hover:glow-approval' : 'hover:glow-denial'}`}>
+    <Card className={`group p-6 transition-smooth hover:-translate-y-1 hover:shadow-lg ${payoutCase.verification_status === 'disputed' ? 'opacity-80 border-destructive/40' : ''}`}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex flex-wrap items-center gap-2">
           <Badge className={isApproval ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'}>
@@ -205,11 +207,11 @@ const FirmDetail = () => {
       )}
 
       {payoutCase.screenshot_url && (
-        <img 
+        <><img 
           src={payoutCase.screenshot_url}
           alt="Payout proof"
-          className="w-full h-40 object-cover rounded-lg mb-4"
-        />
+          className="proof-image w-full h-40 object-cover rounded-md mb-3"
+        /><ProofViewer src={payoutCase.screenshot_url} firm={firm.name} amount={payoutCase.amount} caseId={payoutCase.id} /></>
       )}
 
       {payoutCase.notes && (
@@ -237,7 +239,7 @@ const FirmDetail = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
+    <div className="min-h-screen bg-background">
       <Seo
         title={`${firm.name} Payout Approval Rate | Payout Cases`}
         description={`${firm.name} has a ${approvalRatio.toFixed(1)}% payout approval rate across ${firm.approvals_count + firm.denials_count} reported cases. See verified approvals and denials.`}
@@ -272,11 +274,11 @@ const FirmDetail = () => {
         </Button>
 
         {/* Firm Header */}
-        <Card className="glass p-8 mb-8">
+        <Card className="p-8 mb-8 bg-card">
           <h2 className="sr-only">Firm Overview</h2>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div className="flex-1">
-              <h1 className="text-4xl font-bold mb-4">{firm.name}</h1>
+              <div className="flex items-center gap-4 mb-4"><Avatar className="h-16 w-16 border border-border bg-secondary"><AvatarImage src={firm.logo_url} className="object-contain" /><AvatarFallback>{firm.name.slice(0,2).toUpperCase()}</AvatarFallback></Avatar><div><p className="editorial-kicker">Firm intelligence profile</p><h1 className="text-4xl font-extrabold">{firm.name}</h1></div></div>
               
               <div className="flex items-center mb-4">
                 {[...Array(5)].map((_, i) => (
@@ -339,7 +341,7 @@ const FirmDetail = () => {
         </Card>
 
         {/* Cases Tabs */}
-        <Card className="glass p-6 mb-8">
+        <Card className="p-6 mb-8 bg-card">
           <h2 className="text-2xl font-bold mb-1">Approval Trend</h2>
           <p className="text-sm text-muted-foreground mb-4">Monthly approval rate based on reported cases</p>
           <FirmTrendChart cases={allCases} />

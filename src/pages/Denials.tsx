@@ -17,6 +17,7 @@ import CaseStatusBadge from "@/components/CaseStatusBadge";
 import CaseVoteButtons from "@/components/CaseVoteButtons";
 import SubmitterBadge from "@/components/SubmitterBadge";
 import { useSubmitters } from "@/hooks/useSubmitters";
+import ProofViewer from "@/components/ProofViewer";
 
 const Denials = () => {
   const { toast } = useToast();
@@ -74,17 +75,19 @@ const Denials = () => {
   }, [cases, statusFilter]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
+    <div className="min-h-screen bg-background">
       <Seo
         title="Denied Prop Firm Payouts | Payout Cases"
         description="See a real-time feed of denied payout cases across proprietary trading firms, including reported reasons and firm details."
         path="/denials"
       />
       <Navbar />
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
+      <div className="border-b border-border bg-card pt-24">
+       <div className="container mx-auto px-4 py-12">
+        <p className="editorial-kicker">Payout intelligence database</p>
+        <div className="flex items-end justify-between mt-3 gap-4 flex-wrap">
           <div>
-            <h1 className="text-4xl font-bold mb-4 gradient-denial-text flex items-center">
+            <h1 className="text-4xl font-extrabold mb-3 flex items-center sm:text-5xl">
               <XCircle className="w-10 h-10 mr-3" /> Denied Payouts
             </h1>
             <p className="text-muted-foreground">Real-time feed of denied payout cases across all firms</p>
@@ -95,7 +98,8 @@ const Denials = () => {
               <Button variant={view === "card" ? "default" : "ghost"} size="icon" aria-label="Switch to card view" aria-pressed={view === "card"} onClick={() => setView("card")} className="h-8 w-8"><LayoutGrid className="h-4 w-4" /></Button>
             </div>
           </div>
-        </div>
+        </div></div></div>
+      <div className="container mx-auto px-4 py-10">
 
         <FilterChips
           label="Filter denied cases"
@@ -112,7 +116,7 @@ const Denials = () => {
         <AnimatePresence mode="wait">
           {view === "table" ? (
             <motion.div key="table" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-              <div className="glass rounded-lg overflow-x-auto">
+              <div className="rounded-lg border border-border bg-card overflow-x-auto shadow-sm">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-border hover:bg-transparent">
@@ -148,7 +152,7 @@ const Denials = () => {
                           ) : "—"}
                         </TableCell>
                         <TableCell>
-                          {c.screenshot_url ? <img src={c.screenshot_url} alt="Proof" className="w-12 h-8 object-cover rounded" /> : "—"}
+                           {c.screenshot_url ? <ProofViewer src={c.screenshot_url} firm={c.firms?.name || "Firm"} amount={c.amount} caseId={c.id} /> : "—"}
                         </TableCell>
                         <TableCell className="max-w-[200px] truncate text-sm text-muted-foreground">{c.notes || "—"}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{format(new Date(c.created_at), 'MMM dd, yyyy')}</TableCell>
@@ -162,7 +166,7 @@ const Denials = () => {
             <motion.div key="card" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visibleCases.map((payoutCase) => (
-                  <Card key={payoutCase.id} className={`glass p-6 transition-smooth hover:scale-105 hover:glow-denial ${payoutCase.verification_status === 'disputed' ? 'border-destructive/50' : ''}`}>
+                  <Card key={payoutCase.id} className={`group p-6 transition-smooth hover:-translate-y-1 hover:shadow-lg ${payoutCase.verification_status === 'disputed' ? 'border-destructive/50' : ''}`}>
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <h3 className="text-xl font-bold mb-1">{payoutCase.firms?.name}</h3>
@@ -190,7 +194,7 @@ const Denials = () => {
                         <Twitter className="w-4 h-4" /> View on Twitter/X
                       </a>
                     )}
-                    {payoutCase.screenshot_url && <img src={payoutCase.screenshot_url} alt="Payout proof" className="w-full h-40 object-cover rounded-lg mb-4" />}
+                    {payoutCase.screenshot_url && <><img src={payoutCase.screenshot_url} alt="Payout proof" className="proof-image w-full h-40 object-cover rounded-md mb-3" /><ProofViewer src={payoutCase.screenshot_url} firm={payoutCase.firms?.name || "Firm"} amount={payoutCase.amount} caseId={payoutCase.id} /></>}
                     {payoutCase.notes && <p className="text-sm text-muted-foreground line-clamp-3">{payoutCase.notes}</p>}
                     <div className="mt-4 pt-4 border-t border-border flex items-center justify-between gap-2">
                       <SubmitterBadge submitter={payoutCase.user_id ? submitters[payoutCase.user_id] : undefined} />

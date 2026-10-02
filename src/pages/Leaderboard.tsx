@@ -72,20 +72,20 @@ const Leaderboard = () => {
   }, [entries, sortBy]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
+    <div className="min-h-screen bg-background">
       <Seo
         title="Contributor Leaderboard | Payout Cases"
         description="Top payout case contributors ranked by community trust score, verified submissions and confirmed proof."
         path="/leaderboard"
       />
       <Navbar />
-      <div className="container mx-auto px-4 pt-24 pb-12 max-w-3xl">
+      <div className="border-b border-border bg-card pt-24"><div className="container mx-auto max-w-3xl px-4 py-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 gradient-text-primary flex items-center gap-3">
+          <p className="editorial-kicker mb-3">Community reputation</p><h1 className="text-4xl font-extrabold mb-2 flex items-center gap-3 sm:text-5xl">
             <Trophy className="w-9 h-9" /> Leaderboard
           </h1>
           <p className="text-muted-foreground">Top contributors ranked by trust score.</p>
-        </div>
+        </div></div></div><div className="container mx-auto px-4 py-10 max-w-3xl">
 
         <FilterChips
           label="Rank contributors by"
@@ -103,7 +103,7 @@ const Leaderboard = () => {
         ) : sorted.length === 0 ? (
           <p className="text-center text-muted-foreground py-12">No contributors yet</p>
         ) : (
-          <div className="glass rounded-xl overflow-hidden divide-y divide-border">
+          <div className="bg-card border border-border rounded-lg overflow-hidden divide-y divide-border shadow-sm">
             {sorted.map((e, i) => (
               <div key={e.id} className="flex items-center gap-4 px-5 py-4 hover:bg-secondary/30 transition-colors">
                 <span className={`font-mono w-8 text-sm ${i < 3 ? "text-warning font-bold" : "text-muted-foreground"}`}>
