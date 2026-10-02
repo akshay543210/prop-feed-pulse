@@ -58,7 +58,7 @@ const Notifications = () => {
   }, [user, authLoading]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
+    <div className="min-h-screen bg-background">
       <Seo
         title="Your Notifications | Payout Cases"
         description="New payout cases submitted for the proprietary trading firms you follow."
@@ -72,14 +72,14 @@ const Notifications = () => {
         <p className="text-muted-foreground mb-8">New cases from firms you follow</p>
 
         {!user && !authLoading ? (
-          <Card className="glass p-8 text-center">
+          <Card className="bg-card p-8 text-center">
             <p className="text-muted-foreground mb-4">Sign in to see updates from firms you follow.</p>
             <Button asChild><Link to="/auth">Login / Sign Up</Link></Button>
           </Card>
         ) : loading ? (
           <p className="text-muted-foreground">Loading...</p>
         ) : cases.length === 0 ? (
-          <Card className="glass p-8 text-center">
+          <Card className="bg-card p-8 text-center">
             <p className="text-muted-foreground mb-4">Nothing here yet — follow a firm to get updates.</p>
             <Button asChild variant="outline"><Link to="/firms">Browse firms</Link></Button>
           </Card>
@@ -88,7 +88,7 @@ const Notifications = () => {
             {cases.map((c) => {
               const isNew = new Date(c.created_at).getTime() > lastVisit;
               return (
-                <Card key={c.id} className="glass p-4 flex flex-wrap items-center justify-between gap-3">
+                <Card key={c.id} className="bg-card p-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <div className="flex items-center gap-2">
                       <Link to={`/firms/${c.firm_id}`} className="font-semibold hover:underline">

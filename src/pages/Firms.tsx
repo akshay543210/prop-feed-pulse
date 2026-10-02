@@ -136,7 +136,7 @@ const Firms = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
+    <div className="min-h-screen bg-background">
       <Seo
         title="Proprietary Trading Firms | Payout Cases"
         description="Compare proprietary trading firms by payout approval rate, approvals and denials, updated in real time from verified community cases."
@@ -151,14 +151,16 @@ const Firms = () => {
         }}
       />
       <Navbar />
-      <div className="container mx-auto px-4 pt-24 pb-12">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 gradient-approval-text">PropFirms Performance Tracker</h1>
+      <div className="border-b border-border bg-card pt-24"><div className="container mx-auto px-4 py-12">
+        <div>
+          <p className="editorial-kicker mb-3">Trusted firm intelligence</p>
+          <h1 className="text-4xl font-extrabold mb-4 sm:text-5xl">Prop Firms Performance Tracker</h1>
           <p className="text-muted-foreground">Live feed of all prop firms with real-time payout performance tracking</p>
-        </div>
+        </div></div></div>
+      <div className="container mx-auto px-4 py-10">
 
         {/* Search, Filter & View Toggle */}
-        <div className="glass p-6 rounded-lg mb-8">
+        <div className="bg-card border border-border p-5 rounded-lg mb-8 shadow-sm">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="flex-1 relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -203,7 +205,7 @@ const Firms = () => {
         <AnimatePresence mode="wait">
           {view === "table" ? (
             <motion.div key="table" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-              <div className="glass rounded-lg overflow-hidden">
+              <div className="bg-card border border-border rounded-lg overflow-x-auto shadow-sm">
                 <Table>
                   <TableHeader>
                     <TableRow className="border-border hover:bg-transparent">
@@ -276,7 +278,7 @@ const Firms = () => {
                   const approvalRatio = totalCases > 0 ? (firm.approvals_count / totalCases) * 100 : 0;
                   const rating = getRating(firm);
                   return (
-                    <Card key={firm.id} className="glass p-6 transition-smooth hover:scale-105 hover:glow-approval">
+                    <Card key={firm.id} className="p-6 transition-smooth hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg">
                       <div className="flex items-start justify-between mb-4">
                         <div>
                           <h3 className="text-xl font-bold mb-1">{firm.name}</h3>

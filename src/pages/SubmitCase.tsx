@@ -133,7 +133,7 @@ const SubmitCase = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-card">
+    <div className="min-h-screen bg-background">
       <Seo
         title="Submit a Payout Case | Payout Cases"
         description="Report your prop firm payout approval or denial with proof, and help traders see which firms actually pay out."
@@ -143,7 +143,7 @@ const SubmitCase = () => {
 
       <div className="container mx-auto px-4 pt-24 pb-12 max-w-2xl">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-3 gradient-approval-text flex items-center justify-center">
+          <p className="editorial-kicker mb-3">Evidence submission</p><h1 className="text-4xl font-extrabold mb-3 flex items-center justify-center">
             <PlusCircle className="w-9 h-9 mr-3" />
             Submit Payout Case
           </h1>
@@ -167,7 +167,7 @@ const SubmitCase = () => {
           ))}
         </div>
 
-        <Card className="glass p-8">
+        <Card className="bg-card p-8 shadow-lg">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
@@ -360,7 +360,7 @@ const SubmitCase = () => {
               </Button>
             )}
             {step < STEPS.length - 1 ? (
-              <Button type="button" onClick={next} className="flex-1 bg-gradient-to-r from-primary to-success">
+                <Button type="button" onClick={next} className="flex-1">
                 Continue <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
@@ -368,7 +368,7 @@ const SubmitCase = () => {
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="flex-1 bg-gradient-to-r from-primary to-success"
+                className="flex-1"
               >
                 {isSubmitting ? "Submitting..." : (<><Upload className="w-4 h-4 mr-2" /> Submit Case</>)}
               </Button>
