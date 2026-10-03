@@ -24,11 +24,11 @@ export default function AdminSettings() {
     <AdminLayout>
       <div className="space-y-6">
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-          <h1 className="text-4xl font-bold gradient-text-primary">Settings</h1>
+          <p className="editorial-kicker">Configuration</p><h1 className="text-4xl font-extrabold">Settings</h1>
           <p className="text-muted-foreground mt-2">Configure site settings</p>
         </motion.div>
 
-        <div className="glass-card p-6 rounded-xl border border-border space-y-6">
+        <div className="bg-card p-6 rounded-lg border border-border space-y-6 shadow-sm">
           <div>
             <Label htmlFor="siteName">Site Name</Label>
             <Input

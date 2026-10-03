@@ -63,7 +63,7 @@ const AuthDialog = ({ open, onOpenChange, message, onAuthenticated }: AuthDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="glass-card sm:max-w-md">
+      <DialogContent className="bg-card sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="gradient-text-primary">Login / Sign Up</DialogTitle>
           <DialogDescription>{message || "Sign in to continue."}</DialogDescription>

@@ -136,7 +136,7 @@ const FirmDetail = () => {
 
   if (!firm) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-card">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 pt-24 pb-12 text-center">
           <p className="text-muted-foreground">Loading...</p>
@@ -334,7 +334,7 @@ const FirmDetail = () => {
 
           <div className="w-full h-3 bg-card rounded-full overflow-hidden mt-6">
             <div 
-              className="h-full bg-gradient-to-r from-primary to-success transition-all duration-500"
+              className="h-full bg-success transition-all duration-500"
               style={{ width: `${approvalRatio}%` }}
             />
           </div>

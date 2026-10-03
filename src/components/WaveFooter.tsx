@@ -70,7 +70,7 @@ const WaveFooter = () => {
                   aria-label="Payout Cases on Twitter/X"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 transition-colors"
+                  className="w-11 h-11 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center hover:bg-primary/20 transition-colors"
                 >
                   <Twitter className="w-5 h-5 text-primary" />
                 </motion.a>
@@ -81,7 +81,7 @@ const WaveFooter = () => {
                   aria-label="Payout Cases on Telegram"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center hover:bg-accent/20 transition-colors"
+                  className="w-11 h-11 rounded-md bg-accent/10 border border-accent/20 flex items-center justify-center hover:bg-accent/20 transition-colors"
                 >
                   <Send className="w-5 h-5 text-accent" />
                 </motion.a>
@@ -92,7 +92,7 @@ const WaveFooter = () => {
                   aria-label="Payout Cases on Discord"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-xl bg-success/10 border border-success/20 flex items-center justify-center hover:bg-success/20 transition-colors"
+                  className="w-11 h-11 rounded-md bg-success/10 border border-success/20 flex items-center justify-center hover:bg-success/20 transition-colors"
                 >
                   <MessageCircle className="w-5 h-5 text-success" />
                 </motion.a>
@@ -109,7 +109,7 @@ const WaveFooter = () => {
             className="pt-8 border-t border-border/50 text-center text-sm text-muted-foreground"
           >
             <p>
-              © 2024 Payout Cases. All rights reserved. Built with precision
+              © 2026 Payout Cases. All rights reserved. Built with precision
               for traders.
             </p>
           </motion.div>

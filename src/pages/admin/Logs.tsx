@@ -52,7 +52,7 @@ export default function AdminLogs() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-4xl font-bold gradient-text-primary">Audit Logs</h1>
+            <p className="editorial-kicker">System record</p><h1 className="text-4xl font-extrabold">Audit Logs</h1>
             <p className="text-muted-foreground mt-2">Track all admin actions</p>
           </motion.div>
 
@@ -62,7 +62,7 @@ export default function AdminLogs() {
           </Button>
         </div>
 
-        <div className="glass-card p-6 rounded-xl border border-border">
+        <div className="bg-card p-6 rounded-lg border border-border shadow-sm overflow-x-auto">
           <div className="flex items-center gap-4 mb-6">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

@@ -43,7 +43,7 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 py-2.5">
         <div className="flex items-center justify-between">
-          <Link to="/" className="block hover:scale-105 transition-transform" aria-label="Payout Cases home">
+          <Link to="/" className="block transition-opacity hover:opacity-80" aria-label="Payout Cases home">
             <img
               src={payoutCasesLogo.url}
               alt="Payout Cases"
@@ -138,7 +138,7 @@ const Navbar = () => {
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="glass-card">
+                  <DropdownMenuContent align="end" className="bg-card">
                     <DropdownMenuItem onClick={() => navigate('/notifications')}>
                       <Bell className="mr-2 h-4 w-4" />
                       Notifications

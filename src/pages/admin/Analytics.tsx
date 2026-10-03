@@ -49,7 +49,7 @@ export default function AdminAnalytics() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-4xl font-bold gradient-text-primary">Analytics & Reports</h1>
+            <p className="editorial-kicker">Intelligence</p><h1 className="text-4xl font-extrabold">Analytics & Reports</h1>
             <p className="text-muted-foreground mt-2">View detailed analytics</p>
           </motion.div>
 
@@ -91,7 +91,7 @@ export default function AdminAnalytics() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-card p-6 rounded-xl border border-border"
+              className="bg-card p-6 rounded-lg border border-border shadow-sm"
             >
               <h3 className="text-xl font-bold mb-4">Approval vs Denial</h3>
               <div className="space-y-2">
@@ -110,7 +110,7 @@ export default function AdminAnalytics() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="glass-card p-6 rounded-xl border border-border"
+              className="bg-card p-6 rounded-lg border border-border shadow-sm"
             >
               <h3 className="text-xl font-bold mb-4">Top Performing Firms</h3>
               <div className="space-y-2">
