@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import SubmitCaseButton from "@/components/SubmitCaseButton";
-import payoutCasesLogo from "@/assets/payout-cases-logo.png.asset.json";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,11 +42,11 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 py-2.5">
         <div className="flex items-center justify-between">
-          <Link to="/" className="block hover:scale-105 transition-transform" aria-label="Payout Cases home">
+          <Link to="/" className="block transition-opacity hover:opacity-80" aria-label="Payout Cases home">
             <img
-              src={payoutCasesLogo.url}
+              src="/favicon.png"
               alt="Payout Cases"
-               className="h-10 w-auto max-w-[150px] rounded-sm object-contain"
+              className="h-10 w-10 rounded-sm object-contain"
             />
           </Link>
           
@@ -138,7 +137,7 @@ const Navbar = () => {
                       <User className="h-5 w-5" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="glass-card">
+                  <DropdownMenuContent align="end" className="bg-card">
                     <DropdownMenuItem onClick={() => navigate('/notifications')}>
                       <Bell className="mr-2 h-4 w-4" />
                       Notifications

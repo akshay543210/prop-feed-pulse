@@ -14,7 +14,7 @@ export const StatsCard = ({ title, value, icon: Icon, trend, colorClass = 'text-
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -4 }}
-      className="glass-card p-6 rounded-xl border border-border"
+      className="bg-card p-6 rounded-lg border border-border shadow-sm"
     >
       <div className="flex items-start justify-between">
         <div>

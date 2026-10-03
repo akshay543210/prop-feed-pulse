@@ -89,7 +89,7 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <h1 className="text-4xl font-bold gradient-text-primary">Dashboard</h1>
+            <p className="editorial-kicker">Operations</p><h1 className="text-4xl font-extrabold">Dashboard</h1>
             <p className="text-muted-foreground mt-2">Overview of all activities</p>
           </motion.div>
 
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="glass-card p-6 rounded-xl border border-border"
+          className="bg-card p-6 rounded-lg border border-border shadow-sm"
         >
           <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
           <div className="space-y-3">

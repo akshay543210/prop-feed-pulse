@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
 import { toast } from 'sonner';
-import ParticleBackground from '@/components/ParticleBackground';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -39,19 +38,18 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
-      <ParticleBackground />
+    <div className="market-texture min-h-screen flex items-center justify-center relative overflow-hidden bg-background">
       
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md p-8 glass-card rounded-2xl relative z-10"
+        className="w-full max-w-md p-8 bg-card border border-border shadow-2xl rounded-lg relative z-10"
       >
         <div className="flex flex-col items-center mb-8">
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
             <Shield className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold gradient-text-primary">Admin Login</h1>
+          <h1 className="text-3xl font-bold">Admin Login</h1>
           <p className="text-muted-foreground mt-2">Access the admin panel</p>
         </div>
 

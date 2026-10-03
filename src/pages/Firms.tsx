@@ -242,7 +242,7 @@ const Firms = () => {
                           <TableCell className="text-center">
                             <div className="flex items-center justify-center gap-2">
                               <div className="w-16 h-2 bg-secondary rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-primary to-success" style={{ width: `${rate}%` }} />
+                                <div className="h-full bg-success" style={{ width: `${rate}%` }} />
                               </div>
                               <span className="text-xs text-muted-foreground">{rate}%</span>
                             </div>
@@ -292,7 +292,7 @@ const Firms = () => {
                           <span className="text-destructive">✗ {firm.denials_count} Denied</span>
                         </div>
                         <div className="w-full h-3 bg-card rounded-full overflow-hidden">
-                          <div className="h-full bg-gradient-to-r from-primary to-success transition-all duration-500" style={{ width: `${approvalRatio}%` }} />
+                          <div className="h-full bg-success transition-all duration-500" style={{ width: `${approvalRatio}%` }} />
                         </div>
                         <p className="text-center text-sm font-semibold">{approvalRatio.toFixed(1)}% Approval Rate</p>
                       </div>
