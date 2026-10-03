@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import { Twitter, Send, MessageCircle } from 'lucide-react';
-import payoutCasesLogo from '@/assets/payout-cases-logo.png.asset.json';
 
 const WaveFooter = () => {
   return (
@@ -15,7 +14,10 @@ const WaveFooter = () => {
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
             >
-              <img src={payoutCasesLogo.url} alt="Payout Cases" className="h-12 w-auto object-contain brightness-0 invert mb-4" />
+              <div className="mb-4 flex items-center gap-3">
+                <img src="/favicon.png" alt="" className="h-12 w-12 rounded-sm object-contain brightness-0 invert" />
+                <span className="text-xl font-bold text-foreground">Payout Cases</span>
+              </div>
               <p className="text-muted-foreground text-sm">
                 Premium real-time analytics for proprietary trading firm payouts.
                 Track, analyze, and make informed decisions.

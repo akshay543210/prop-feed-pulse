@@ -70,7 +70,7 @@ export default function Auth() {
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
             <User className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold gradient-text-primary text-center">
+          <h1 className="text-3xl font-bold text-center">
             Welcome to Payout Cases — Sign In or Register
           </h1>
           <p className="text-muted-foreground mt-2">Login or create an account</p>

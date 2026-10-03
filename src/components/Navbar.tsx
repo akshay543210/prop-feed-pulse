@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import SubmitCaseButton from "@/components/SubmitCaseButton";
-import payoutCasesLogo from "@/assets/payout-cases-logo.png.asset.json";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,9 +44,9 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           <Link to="/" className="block transition-opacity hover:opacity-80" aria-label="Payout Cases home">
             <img
-              src={payoutCasesLogo.url}
+              src="/favicon.png"
               alt="Payout Cases"
-               className="h-10 w-auto max-w-[150px] rounded-sm object-contain"
+              className="h-10 w-10 rounded-sm object-contain"
             />
           </Link>
           

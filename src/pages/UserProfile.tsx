@@ -98,7 +98,7 @@ const UserProfile = ({ self = false }: { self?: boolean }) => {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-4xl font-bold gradient-text-primary">{score}</p>
+                  <p className="text-4xl font-bold text-primary">{score}</p>
                   <p className="text-xs text-muted-foreground mb-2">Trust score</p>
                   <Badge variant="outline" className={trustLabelClass(score)}>{trustLabel(score)}</Badge>
                 </div>
